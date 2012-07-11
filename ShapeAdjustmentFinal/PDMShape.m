@@ -157,13 +157,25 @@
 
 - (void)translate:(float)tx:(float)ty
 {
-    float *shape_ptr = &shape[0];
-    for(int i = 0; i < num_points; ++i)
-    {
-        *shape_ptr++ += tx;
-        *shape_ptr++ += ty;
-        shape_ptr++;
-    }
+//    float *shape_ptr = &shape[0];
+//    for(int i = 0; i < num_points; ++i)
+//    {
+//        *shape_ptr++ += tx;
+//        *shape_ptr++ += ty;
+//        shape_ptr++;
+//    }
+    
+    float T[9];
+    T[0] = 1;
+    T[1] = 0;
+    T[2] = 0;
+    T[3] = 0;
+    T[4] = 1;
+    T[5] = 0;
+    T[6] = tx;
+    T[7] = ty;
+    T[8] = 1;
+    [self transformAffine:&T[0]];
 }
 
 - (void)transformAffine:(float*)T
@@ -172,7 +184,9 @@
     int ldt = 3;
     int ldb = 3;
     
-    float scale = 1.0;
+    float s = 1.0;
+    float *tmpShape = malloc(3*num_points*sizeof(float));
+    memset(tmpShape, 0, 3*num_points*sizeof(float));
     
     cblas_sgemm(CblasRowMajor,
                 CblasNoTrans,
@@ -180,15 +194,22 @@
                 num_points,     // num of rows in matrices A and C
                 3,              // num of col in matrices B and C
                 3,              // Num of col in matrix A; number of rows in matrix B.
-                scale,          // alpha
+                s,              // alpha
                 shape,          // matrix A
                 lda,            // size of the first dimension of matrix A
                 T,              // matrix B
                 ldt,            // size of the first dimension of matrix B
-                scale,          // beta
-                shape,          // matrix C
+                s,              // beta
+                tmpShape,          // matrix C
                 ldb             // size of the first dimention of matrix C
                 );
+    
+    float *shape_ptr = &shape[0];
+    float *tmpshape_ptr = &tmpShape[0];
+    for(int i = 0; i < 3*num_points; ++i) {
+        *shape_ptr++ = *tmpshape_ptr++;
+    }
+    free(tmpShape);
 }
 
 - (void)transformAffineMat:(TMat)T

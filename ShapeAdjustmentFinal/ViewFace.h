@@ -25,10 +25,12 @@ typedef enum
     TouchMode touchMode;
     CGPoint touchStartPos;
     float touchStartDistance;
+    float touchStartAngle;
     
     float scale;
     
     NSMutableArray *activeTouches;
+    NSDate *firstTouchStart;
 }
 
 - (void)setNewFace:(Face*)f;

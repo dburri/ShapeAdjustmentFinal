@@ -107,21 +107,34 @@
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {   
-    [activeTouches addObjectsFromArray:[touches allObjects]];
+    NSArray *touchesArray = [touches allObjects];
+    for(NSInteger j = 0; j < [touchesArray count]; ++j) {
+        if (![activeTouches containsObject:[touchesArray objectAtIndex:j]]) {
+            [activeTouches addObject:[touchesArray objectAtIndex:j]];
+        };
+    }
     
     int touchesCount = [activeTouches count];
     NSLog(@"Touch Count = %i", touchesCount);
     
+    if(touchesCount == 1) {
+        firstTouchStart = [NSDate date];
+    }
+    NSDate *touchTime = [NSDate date];
+    double dt = [touchTime timeIntervalSinceDate:firstTouchStart];
+
     
     if(touchesCount == 1 && touchMode == TOUCH_NONE)
     {
+        NSLog(@"set mode to translate");
         touchMode = TOUCH_TRANSLATE_SHAPE;
         UITouch * touch = [touches anyObject];
         touchStartPos = [touch locationInView:self];
     }
     
-    if(touchesCount == 2 && touchMode == TOUCH_NONE)
+    if(touchesCount == 2 && dt < 0.5)
     {
+        NSLog(@"set mode to scale");
         touchMode = TOUCH_SCALE_SHAPE;
         UITouch *touch1 = [activeTouches objectAtIndex:0];
         UITouch *touch2 = [activeTouches objectAtIndex:1];
@@ -129,7 +142,9 @@
         CGPoint p1 = [touch1 locationInView:self];
         CGPoint p2 = [touch2 locationInView:self];
         
+        touchStartPos = CGPointMake((p1.x+p2.x)/2, (p1.y+p2.y)/2);
         touchStartDistance = sqrtf( powf(p1.x-p2.x,2) + powf(p1.y-p2.y,2));
+        touchStartAngle = atan2f(p1.x-p2.x, p1.y-p2.y);
     }
 }
 
@@ -157,46 +172,47 @@
         
         CGPoint p1 = [touch1 locationInView:self];
         CGPoint p2 = [touch2 locationInView:self];
+        CGPoint p = CGPointMake((p1.x+p2.x)/2, (p1.y+p2.y)/2);
+        
+        float dx = (p.x-touchStartPos.x)/scale;
+        float dy = -(p.y-touchStartPos.y)/scale;
         
         float touchDistance = sqrtf( powf(p1.x-p2.x,2) + powf(p1.y-p2.y,2));
         float s = touchDistance/touchStartDistance;
+        float touchAngle = atan2f(p1.x-p2.x, p1.y-p2.y);
+        float a = touchAngle - touchStartAngle;
+        NSLog(@"Angle = %f", a);
         
         [face.shape setNewShapeData:tmpShape];
         CGPoint center = [face.shape getCenterOfGravity];
         [face.shape translate:-center.x :-center.y];
         [face.shape scale:s];
-        [face.shape translate:center.x :center.y];
+        [face.shape rotate:a];
+        [face.shape translate:center.x+dx :center.y+dy];
     }
     
     [self setNeedsDisplay];
     
 }
 
+// touch ended
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    NSLog(@"Touch endend...");
+    // remove the touch from the list of active touches
     NSArray *touchesArray = [touches allObjects];
-    
-    for(NSInteger j = 0; j < [touchesArray count]; ++j)
-    {
-        for(NSInteger i = [activeTouches count]-1; i >= 0 ; --i)
-        {
-            if([activeTouches objectAtIndex:i] == [touchesArray objectAtIndex:j]) {
-                NSLog(@"remove touch!!!");
-                [activeTouches removeObjectAtIndex:i];
-            }
-        }
+    for(NSInteger j = 0; j < [touchesArray count]; ++j) {
+        NSUInteger ind = [activeTouches indexOfObject:[touchesArray objectAtIndex:j]];
+        
+        if(ind == 0 && touchMode == TOUCH_TRANSLATE_SHAPE)
+            touchMode = TOUCH_NONE;
+        
+        if((ind == 0 || ind == 1) && touchMode == TOUCH_SCALE_SHAPE)
+            touchMode = TOUCH_NONE;
+
+        if(ind != NSNotFound)
+            [activeTouches removeObjectAtIndex:ind];
     }
-    
     [tmpShape setNewShapeData:face.shape];
-    
-    touchMode = TOUCH_NONE;
-    
-    //if([activeTouches count] < 2)
-    //    touchMode = TOUCH_TRANSLATE_SHAPE;
-    //if([activeTouches count] < 1)
-    //    touchMode = TOUCH_NONE;
-    
 }
 
 @end
