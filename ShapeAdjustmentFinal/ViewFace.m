@@ -195,7 +195,9 @@
     
 }
 
-// touch ended
+/**
+ Called when a touch ends
+ */
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
     // remove the touch from the list of active touches
