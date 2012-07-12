@@ -26,6 +26,7 @@ typedef struct TMat {
 
 - (void)loadShape:(NSString*)file;
 - (id)getCopy;
+- (float*)getDataAccess;
 - (void)setNewShapeData:(PDMShape*)s;
 
 - (CGRect)getMinBoundingBox;

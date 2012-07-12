@@ -45,6 +45,12 @@
     return [[PDMShape alloc] initWithData:self];
 }
 
+
+- (float*)getDataAccess
+{
+    return shape;
+}
+
 - (void)setNewShapeData:(PDMShape *)s
 {
     NSLog(@"PDMShape:setNewShapeData");
