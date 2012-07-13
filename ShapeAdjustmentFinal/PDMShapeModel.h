@@ -20,6 +20,7 @@
 }
 
 @property (retain) PDMShape *meanShape;
+@property size_t num_vecs;
 
 
 - (void)loadModel:(NSString*)fXM :(NSString*)fV :(NSString*)fD :(NSString*)fTRI;

@@ -9,11 +9,15 @@
 #import <Foundation/Foundation.h>
 #import <Accelerate/Accelerate.h>
 
+typedef struct TMatch {
+    float a, b, tx, ty;
+} TMatch;
+
 typedef struct TMat {
     float *a1, *a2, *a3, *a4, *a5, *a6;
 } TMat;
 
-@interface PDMShape : NSObject <NSCopying>
+@interface PDMShape : NSObject
 {
     float *shape;
     size_t num_points;
@@ -26,7 +30,6 @@ typedef struct TMat {
 
 - (void)loadShape:(NSString*)file;
 - (id)getCopy;
-- (float*)getDataAccess;
 - (void)setNewShapeData:(PDMShape*)s;
 
 - (CGRect)getMinBoundingBox;
@@ -37,6 +40,8 @@ typedef struct TMat {
 - (void)translate:(float)tx:(float)ty;
 
 - (void)transformAffine:(float*)T;
-- (void)transformAffineMat:(TMat)T;
+- (void)transformAffineMatch:(TMatch)T;
+
+- (TMatch)alignShapeTo:(PDMShape*)s;
 
 @end

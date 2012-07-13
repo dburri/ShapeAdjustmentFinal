@@ -11,6 +11,7 @@
 @implementation PDMShapeModel
 
 @synthesize meanShape;
+@synthesize num_vecs;
 
 - (id)init 
 {
@@ -26,6 +27,7 @@
 {
     NSLog(@"PDMShapeModel:dealloc");
     meanShape = nil;
+    free(eigVecs);
 }
 
 
@@ -45,7 +47,7 @@
         params[i] = [[b objectAtIndex:i] floatValue];
     }
     
-    float *shapeData = [shape getDataAccess];
+    float *shapeData = shape.shape;
     
     int lda = num_vecs;
     int ldb = 1;
@@ -56,9 +58,9 @@
     cblas_sgemm(CblasRowMajor,
                 CblasNoTrans,
                 CblasNoTrans,
-                num_points,     // num of rows in matrices A and C
-                3,              // num of col in matrices B and C
-                3,              // Num of col in matrix A; number of rows in matrix B.
+                num_points*3,     // num of rows in matrices A and C
+                1,              // num of col in matrices B and C
+                num_vecs,              // Num of col in matrix A; number of rows in matrix B.
                 s,              // alpha
                 eigVecs,          // matrix A
                 lda,            // size of the first dimension of matrix A
@@ -114,20 +116,29 @@
     num_points = ([rowArray count]-1)/2;
     num_vecs = ([colArray count]-1);
     NSLog(@"Number of points = %zu, number of vectors = %zu", num_points, num_vecs);
-    eigVecs = malloc(3*num_points*num_vecs);
+    eigVecs = malloc(3*num_points*num_vecs*sizeof(float));
+    if(eigVecs == NULL) {
+        NSLog(@"Could not allocate memory to store eigenvectors!");
+    }
     
     float *data_ptr = &eigVecs[0];
     for(int i = 0; i < num_points; ++i)
     {
+        //NSLog(@"i = %i, difference = %i", i, data_ptr-&eigVecs[0]);
         NSArray *colXArray = [[rowArray objectAtIndex:i] componentsSeparatedByString:@","];
         NSArray *colYArray = [[rowArray objectAtIndex:i+num_points] componentsSeparatedByString:@","];
         
+        // x-coordinates
         for(int j = 0; j < num_vecs; ++j) {
             *data_ptr++ = [[colXArray objectAtIndex:j] doubleValue];
         }
+        
+        // y-coordinates
         for(int j = 0; j < num_vecs; ++j) {
             *data_ptr++ = [[colYArray objectAtIndex:j] doubleValue];
         }
+        
+        // make then already homogeneous
         for(int j = 0; j < num_vecs; ++j) {
             *data_ptr++ = 0;
         }

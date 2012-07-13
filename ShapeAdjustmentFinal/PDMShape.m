@@ -45,12 +45,6 @@
     return [[PDMShape alloc] initWithData:self];
 }
 
-
-- (float*)getDataAccess
-{
-    return shape;
-}
-
 - (void)setNewShapeData:(PDMShape *)s
 {
     NSLog(@"PDMShape:setNewShapeData");
@@ -137,13 +131,25 @@
 
 - (void)scale:(float)s
 {
-    float *shape_ptr = &shape[0];
-    for(int i = 0; i < num_points; ++i)
-    {
-        *shape_ptr++ *= s;
-        *shape_ptr++ *= s;
-        shape_ptr++;
-    }
+//    float *shape_ptr = &shape[0];
+//    for(int i = 0; i < num_points; ++i)
+//    {
+//        *shape_ptr++ *= s;
+//        *shape_ptr++ *= s;
+//        shape_ptr++;
+//    }
+    
+    float T[9];
+    T[0] = s;
+    T[1] = 0;
+    T[2] = 0;
+    T[3] = 0;
+    T[4] = s;
+    T[5] = 0;
+    T[6] = 0;
+    T[7] = 0;
+    T[8] = 1;
+    [self transformAffine:&T[0]];
 }
 
 - (void)rotate:(float)a
@@ -218,9 +224,54 @@
     free(tmpShape);
 }
 
-- (void)transformAffineMat:(TMat)T
+- (void)transformAffineMatch:(TMatch)T
 {
+    float mat[9];
     
+    mat[0] = T.a;
+    mat[1] = T.b;
+    mat[2] = 0;
+    mat[3] = -T.b;
+    mat[4] = T.a;
+    mat[5] = 0;
+    mat[6] = T.tx;
+    mat[7] = T.ty;
+    mat[8] = 1;
+    
+    [self transformAffine:mat];
+}
+
+
+- (TMatch)alignShapeTo:(PDMShape*)s
+{
+    NSLog(@"Find matching transformation");
+    double a = 0;
+    double b = 0;
+    double c = 0;
+    const float *data_ptr1 = &shape[0];
+    const float *data_ptr2 = &(s.shape[0]);
+    for(int i = 0; i < num_points; ++i)
+    {
+        a += ((*data_ptr1) * (*data_ptr2) + (*(data_ptr1+1)) * (*(data_ptr2+1)));
+        b += ((*data_ptr1) * (*(data_ptr2+1)) - (*(data_ptr1+1)) * (*data_ptr2));
+        c += ((*data_ptr1) * (*data_ptr1) + (*(data_ptr1+1)) * (*(data_ptr1+1)));
+        
+        data_ptr1 += 3;
+        data_ptr2 += 3;
+    }
+    
+    CGPoint g = [s getCenterOfGravity];
+    
+    TMatch match;
+    match.a = (float)(a/c);
+    match.b = (float)(b/c);
+    match.tx = g.x;
+    match.ty = g.y;
+    
+    //NSLog(@"match: a = %f, b = %f, tx = %f, ty = %f", match.a, match.b, match.tx, match.ty);
+    //NSLog(@"match: s = %f, r = %f", sqrt(pow(match.a,2)+pow(match.b,2)), atan2(match.b, match.a));
+    
+    return match;
 }
 
 @end
