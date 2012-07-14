@@ -36,6 +36,7 @@
 - (void)transformAffine:(float*)T;
 - (void)transformAffineMat:(PDMTMat*)T;
 
-- (PDMTMat*)alignShapeTo:(PDMShape*)s;
+- (PDMTMat*)findAlignTransformationTo:(PDMShape*)s;
+- (void)alignShapeTo:(PDMShape*)s;
 
 @end

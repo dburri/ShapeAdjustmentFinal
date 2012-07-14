@@ -11,6 +11,7 @@
 @implementation ControlMain
 
 @synthesize shapeModel;
+@synthesize shapeParams;
 @synthesize face;
 
 
@@ -72,6 +73,11 @@ static int theCount = 0;
 //    TMatch T = [newShape alignShapeTo:face.shape];
 //    [newShape transformAffineMatch:T];
 //    face.shape  = newShape;
+    
+    
+    
+    
+    
     
 }
 

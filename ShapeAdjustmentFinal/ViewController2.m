@@ -83,8 +83,7 @@
 {
     NSLog(@"UPDATE MODEL");
     PDMShape *newShape = [mainController.shapeModel createNewShapeWithParams:b];
-    PDMTMat *T = [newShape alignShapeTo:tmpShape];
-    [newShape transformAffineMat:T];
+    [newShape alignShapeTo:tmpShape];
     mainController.face.shape = newShape;
     [faceView updateShape:newShape];
 }

@@ -43,4 +43,93 @@
     free(T);
 }
 
+
+- (PDMTMat*)multiply:(PDMTMat*)T2
+{
+    PDMTMat *newT = [[PDMTMat alloc] init];
+    
+    for(int i = 0; i < 3; ++i)
+    {
+        for(int j = 0; j < 3; ++j)
+        {
+            newT.T[i*3+j] = 0;
+            for(int k = 0; k < 3; ++k)
+            {
+                newT.T[i*3+j] += T[i*3+k] * T2.T[k*3+j];
+            }
+        }
+    }
+    return newT;
+}
+
+
+// solution from:
+// http://mathworld.wolfram.com/MatrixInverse.html
+
+- (PDMTMat*)inverse
+{
+    PDMTMat *TInv = [[PDMTMat alloc] init];
+
+    double det_1 = 
+    T[0]*T[4]*T[8] -
+    T[0]*T[5]*T[7] -
+    T[1]*T[3]*T[8] +
+    T[1]*T[5]*T[6] +
+    T[2]*T[3]*T[7] -
+    T[2]*T[4]*T[6];
+    
+    det_1 = 1/det_1;
+    
+    TInv.T[0] = det_1*(T[8]*T[4]-T[7]*T[5]);
+    TInv.T[1] = det_1*(T[7]*T[2]-T[8]*T[1]);
+    TInv.T[2] = det_1*(T[5]*T[1]-T[4]*T[2]);
+    TInv.T[3] = det_1*(T[6]*T[5]-T[8]*T[3]);
+    TInv.T[4] = det_1*(T[8]*T[0]-T[6]*T[2]);
+    TInv.T[5] = det_1*(T[3]*T[2]-T[5]*T[0]);
+    TInv.T[6] = det_1*(T[7]*T[3]-T[6]*T[4]);
+    TInv.T[7] = det_1*(T[6]*T[1]-T[7]*T[0]);
+    TInv.T[8] = det_1*(T[4]*T[0]-T[3]*T[1]);
+    
+    return TInv;
+    
+    
+//    PDMTMat *TInv = [[PDMTMat alloc] init];
+//    [self inverseMatf:T :3 :TInv.T];
+//    return TInv;
+}
+
+- (void)inverseMatd:(double*)A:(long)N
+{
+    long pivotArray[N];
+    long info;
+    double lapWS[N*N];
+    
+    long workLength = N*N;
+    long lda = N;
+    dgetrf_(&N, &N, A, &lda, pivotArray, &info);
+    dgetri_(&N, A, &N, pivotArray, lapWS, &workLength, &info);
+}
+
+
+- (void)inverseMatf:(const float*)A:(long)N:(float*)B
+{
+    // create temporary double array
+    double *At = malloc(N*N*sizeof(double));
+    const float *A_ptr = A;
+    double *At_ptr = At;
+    for(int i = 0; i < N*N; ++i)
+        *At_ptr++ = *A_ptr++;
+    
+    // calculate inverse mat
+    [self inverseMatd:At :N];
+    
+    // copy double array back
+    float *B_ptr = B;
+    At_ptr = At;
+    for(int i = 0; i < N*N; ++i)
+        *B_ptr++ = *At_ptr++;
+    
+    free(At);
+}
+
 @end

@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "ControlMain.h"
 #import "ViewFace3.h"
+#import "ViewController2.h"
 
 @interface ViewController3 : UIViewController
 {

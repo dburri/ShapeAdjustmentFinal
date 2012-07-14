@@ -78,6 +78,21 @@
 }
 
 
+- (PDMShapeParameter*)findBestMatchingParams:(PDMShape*)s
+{
+    PDMShapeParameter *params = [[PDMShapeParameter alloc] init];
+    params.b = [[NSMutableArray alloc] initWithCapacity:num_vecs];
+    
+    PDMShape *tmpShape = [[PDMShape alloc] initWithData:meanShape];
+    
+    [tmpShape alignShapeTo:s];
+    
+    return params;
+}
+
+
+// -----------------------------------------------
+// FILE HANDLING
 
 - (void)loadModel:(NSString*)fXM :(NSString*)fV :(NSString*)fD :(NSString*)fTRI
 {

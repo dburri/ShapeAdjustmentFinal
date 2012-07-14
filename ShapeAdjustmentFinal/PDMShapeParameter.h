@@ -10,11 +10,12 @@
 
 @interface PDMShapeParameter : NSObject
 {
-    PDMTMat *align;
-    float *params;
-    size_t num_params;
+    PDMTMat *T;
+    NSMutableArray *b;
 }
 
-@property PDMTMat *align;
+@property (retain) PDMTMat *T;
+@property (retain) NSMutableArray *b;
+
 @end
 

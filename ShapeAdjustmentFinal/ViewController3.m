@@ -45,4 +45,13 @@
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender 
+{
+    if([[segue identifier] isEqualToString:@"View3ToView2"]) {
+        ViewController2 *VC = (ViewController2*)[segue destinationViewController];
+        VC.mainController = mainController;
+        NSLog(@"Transition to the second view");
+    }
+}
+
 @end

@@ -10,7 +10,8 @@
 
 @implementation PDMShapeParameter
 
-@synthesize align;
+@synthesize T;
+@synthesize b;
 
 - (id)init 
 {
@@ -24,7 +25,6 @@
 - (void)dealloc
 {
     NSLog(@"PDMShapeParameter:dealloc");
-    free(params);
 }
 
 @end

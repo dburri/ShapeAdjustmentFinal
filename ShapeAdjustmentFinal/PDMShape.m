@@ -241,8 +241,7 @@
     [self transformAffine:T.T];
 }
 
-
-- (PDMTMat*)alignShapeTo:(PDMShape*)s
+- (PDMTMat*)findAlignTransformationTo:(PDMShape*)s;
 {
     //NSLog(@"Find matching transformation");
     double a = 0;
@@ -280,6 +279,12 @@
     //NSLog(@"match: s = %f, r = %f", sqrt(pow(match.a,2)+pow(match.b,2)), atan2(match.b, match.a));
     
     return mat;
+}
+
+- (void)alignShapeTo:(PDMShape*)s
+{
+    PDMTMat *T = [self findAlignTransformationTo:s];
+    [self transformAffineMat:T];
 }
 
 @end

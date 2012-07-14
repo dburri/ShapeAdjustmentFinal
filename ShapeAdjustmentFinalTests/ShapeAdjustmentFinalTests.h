@@ -7,6 +7,8 @@
 //
 
 #import <SenTestingKit/SenTestingKit.h>
+#import <Accelerate/Accelerate.h>
+#import "PDMTMat.h"
 
 @interface ShapeAdjustmentFinalTests : SenTestCase
 

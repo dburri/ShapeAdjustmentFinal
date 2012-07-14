@@ -13,12 +13,14 @@
 
 @interface ControlMain : NSObject {
     PDMShapeModel *shapeModel;
+    PDMShapeParameter *shapeParams;
     Face *face;
     int count;
 }
 + (int)count;
 
 @property (retain) PDMShapeModel *shapeModel;
+@property (retain) PDMShapeParameter *shapeParams;
 @property (retain) Face *face;
 
 - (void)newFaceWithImage:(UIImage*)image;
