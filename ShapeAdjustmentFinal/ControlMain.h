@@ -23,6 +23,9 @@
 @property (retain) PDMShapeParameter *shapeParams;
 @property (retain) Face *face;
 
+- (void)loadShapeModel:(NSString*)fXM :(NSString*)fV :(NSString*)fD :(NSString*)fTRI;
+
 - (void)newFaceWithImage:(UIImage*)image;
+
 
 @end

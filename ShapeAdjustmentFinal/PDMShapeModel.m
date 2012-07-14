@@ -59,17 +59,17 @@
     cblas_sgemm(CblasRowMajor,
                 CblasNoTrans,
                 CblasNoTrans,
-                num_points*3,     // num of rows in matrices A and C
-                1,              // num of col in matrices B and C
-                num_vecs,              // Num of col in matrix A; number of rows in matrix B.
-                s,              // alpha
-                eigVecs,          // matrix A
-                lda,            // size of the first dimension of matrix A
-                params,              // matrix B
-                ldb,            // size of the first dimension of matrix B
-                s,              // beta
-                shapeData,       // matrix C
-                ldc             // size of the first dimention of matrix C
+                num_points*3,       // num of rows in matrices A and C
+                1,                  // num of col in matrices B and C
+                num_vecs,           // Num of col in matrix A; number of rows in matrix B.
+                s,                  // alpha
+                eigVecs,            // matrix A
+                lda,                // size of the first dimension of matrix A
+                params,             // matrix B
+                ldb,                // size of the first dimension of matrix B
+                s,                  // beta
+                shapeData,          // matrix C
+                ldc                 // size of the first dimention of matrix C
                 );
     
 
@@ -78,14 +78,79 @@
 }
 
 
+- (PDMShape*)createNewShapeWithAllParams:(PDMShapeParameter*)params
+{
+    PDMShape *s = [self createNewShapeWithParams:params.b];
+    //PDMShape *s = [meanShape getCopy];
+    [s transformAffineMat:params.T];
+    return s;
+}
+
+
+
+/**
+ Find the best match
+ */
 - (PDMShapeParameter*)findBestMatchingParams:(PDMShape*)s
 {
-    PDMShapeParameter *params = [[PDMShapeParameter alloc] init];
-    params.b = [[NSMutableArray alloc] initWithCapacity:num_vecs];
-    
+    PDMShapeParameter *params = [[PDMShapeParameter alloc] initWithSize:num_vecs];
     PDMShape *tmpShape = [[PDMShape alloc] initWithData:meanShape];
     
-    [tmpShape alignShapeTo:s];
+    // project Y into the model coordinate frame
+    PDMShape *s2 = [s getCopy];
+    params.T = [tmpShape findAlignTransformationTo:s];
+    PDMTMat *TInv = [params.T inverse];
+    [s2 transformAffineMat:TInv];
+    
+    // project y into the tangent space to x
+    [s2 transformIntoTangentSpaceTo:meanShape];
+    
+    // update model parameters
+    float *bParams = malloc(num_vecs*sizeof(float));
+    memset(bParams, 0, num_vecs*sizeof(float));
+    float *difference = malloc(num_points*3*sizeof(float));
+    
+    float *data_ptr1 = meanShape.shape;
+    float *data_ptr2 = s2.shape;
+    float *data_ptr3 = difference;
+    for(int i = 0; i < num_points; ++i)
+    {
+        *data_ptr3++ = ((*data_ptr2++) - (*data_ptr1++));
+        *data_ptr3++ = ((*data_ptr2++) - (*data_ptr1++));
+        
+        data_ptr1++;
+        data_ptr2++;
+        data_ptr3++;
+    }
+    
+    
+    int lda = num_vecs;
+    int ldb = 1;
+    int ldc = 1;
+    
+    float scale = 1.0;
+    
+    cblas_sgemm(CblasRowMajor,
+                CblasTrans,
+                CblasNoTrans,
+                num_vecs,       // num of rows in matrices A and C
+                1,                  // num of col in matrices B and C
+                3*num_points,           // Num of col in matrix A; number of rows in matrix B.
+                scale,                  // alpha
+                eigVecs,            // matrix A
+                lda,                // size of the first dimension of matrix A
+                difference,             // matrix B
+                ldb,                // size of the first dimension of matrix B
+                scale,                  // beta
+                bParams,          // matrix C
+                ldc                 // size of the first dimention of matrix C
+                );
+    
+    
+    for(int i = 0; i < num_vecs; ++i) {
+        [params.b replaceObjectAtIndex:i withObject:[NSNumber numberWithFloat:bParams[i]]];
+        NSLog(@"%i: %f", i, bParams[i]);
+    }
     
     return params;
 }
@@ -252,5 +317,38 @@
     
 }
 
+
+
+- (void)printEigVectors
+{
+    // print vectors
+    for(int i = 0; i < num_vecs; ++i)
+    {
+        NSMutableString *tmp = [[NSMutableString alloc] init];
+        [tmp appendFormat:@"V%i = [", i];
+        for(int j = 0; j < num_points*3; ++j)
+        {
+            [tmp appendFormat:@"%f, ", eigVecs[i+j*num_vecs]];
+        }
+        [tmp appendFormat:@"]"];
+        NSLog(@"%@", tmp);
+    }
+}
+
+
+- (void)printShapeValues:(PDMShape*)s
+{
+    // print shape values
+    for(int i = 0; i < 3*s.num_points; i+=3)
+    {
+        NSMutableString *tmp = [[NSMutableString alloc] init];
+        [tmp appendFormat:@"P%i = [", i];
+        [tmp appendFormat:@"%f, ", s.shape[i+0]];
+        [tmp appendFormat:@"%f, ", s.shape[i+1]];
+        [tmp appendFormat:@"%f", s.shape[i+2]];
+        [tmp appendFormat:@"]"];
+        NSLog(@"%@", tmp);
+    }
+}
 
 @end

@@ -226,18 +226,6 @@
 
 - (void)transformAffineMat:(PDMTMat*)T
 {
-//    float mat[9];
-//    
-//    mat[0] = T.a;
-//    mat[1] = T.b;
-//    mat[2] = 0;
-//    mat[3] = -T.b;
-//    mat[4] = T.a;
-//    mat[5] = 0;
-//    mat[6] = T.tx;
-//    mat[7] = T.ty;
-//    mat[8] = 1;
-    
     [self transformAffine:T.T];
 }
 
@@ -286,5 +274,31 @@
     PDMTMat *T = [self findAlignTransformationTo:s];
     [self transformAffineMat:T];
 }
+
+- (void)transformIntoTangentSpaceTo:(PDMShape*)s
+{
+    float scale = 0;
+    float *data_ptr1 = &shape[0];
+    float *data_ptr2 = &s.shape[0];
+    for(int i = 0; i < num_points; ++i)
+    {
+        scale += ((*data_ptr1++) * (*data_ptr2++));
+        scale += ((*data_ptr1++) * (*data_ptr2++));
+        data_ptr1++;
+        data_ptr2++;
+    }
+    
+    scale = 1/scale;
+    
+    data_ptr1 = &shape[0];
+    for(int i = 0; i < num_points; ++i)
+    {
+        (*data_ptr1++) *= scale;
+        (*data_ptr1++) *= scale;
+        data_ptr1++;
+    }
+}
+
+
 
 @end

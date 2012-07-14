@@ -17,5 +17,7 @@
 @property (retain) PDMTMat *T;
 @property (retain) NSMutableArray *b;
 
+- (id)initWithSize:(int)s;
+
 @end
 

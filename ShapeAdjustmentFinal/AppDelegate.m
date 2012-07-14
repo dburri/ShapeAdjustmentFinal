@@ -17,25 +17,14 @@
 {
     // Override point for customization after application launch.
     
-    // initialize control
+    // initialize main controller
     ControlMain *mainController = [[ControlMain alloc] init];
-    
-    // initialize model and pass it to controller
-    PDMShapeModel *shapeModel = [[PDMShapeModel alloc] init];
-    [shapeModel loadModel:@"model_xm" :@"model_v" :@"model_d" :@"model_tri"];
-    mainController.shapeModel = shapeModel;
+    [mainController loadShapeModel:@"model_xm" :@"model_v" :@"model_d" :@"model_tri"];
 
     // retrieve root view controller and pass main controller to it
     ViewController *rootViewController = (ViewController*)_window.rootViewController;
     rootViewController.mainController = mainController;
 
-    
-    
-    // Access ViewController and set the main controller to it
-    //UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"MainStoryboard" bundle: nil];
-    //ViewController *controller = (ViewController*)[mainStoryboard instantiateViewControllerWithIdentifier: @"ViewControllerMain"];
-    //[controller setMainControl:mainController];
-    //mainController = nil;
     
     NSLog(@"Application launched....");
     

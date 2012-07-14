@@ -28,11 +28,13 @@
     if(mainController)
     {
         [faceView setNewFace:mainController.face];
-        b = [[NSMutableArray alloc] init];
-        for(int i = 0; i < mainController.shapeModel.num_vecs; ++i) {
-            [b addObject:[NSNumber numberWithFloat:0]];
-        }
         tmpShape = mainController.face.shape;
+        
+        // set param vector
+        b = mainController.shapeParams.b;
+        int index = segControl.selectedSegmentIndex;
+        NSLog(@"INDEX = %i, SIZE OF B = %i", index, [b count]);
+        [slider setValue:[[b objectAtIndex:index] floatValue]];
     }
 }
 

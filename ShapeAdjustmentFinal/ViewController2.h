@@ -15,6 +15,8 @@
 @interface ViewController2 : UIViewController
 {
     ControlMain *mainController;
+    
+    PDMShapeParameter *tmpParam;
     NSMutableArray *b;
     PDMShape *tmpShape;
     

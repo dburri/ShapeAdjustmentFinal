@@ -35,6 +35,18 @@ static int theCount = 0;
     face = nil;
 }
 
+
+- (void)loadShapeModel:(NSString*)fXM :(NSString*)fV :(NSString*)fD :(NSString*)fTRI
+{
+    NSLog(@"LOADING SHAPE MODEL!!!");
+    shapeModel = [[PDMShapeModel alloc] init];
+    [shapeModel loadModel:fXM :fV :fD :fTRI];
+    
+    NSLog(@"INITIALIZE PARAM VECTOR TO SIZE %zu", shapeModel.num_vecs);
+    shapeParams = [[PDMShapeParameter alloc] initWithSize:shapeModel.num_vecs];
+    NSLog(@"SIZE =  %i", [shapeParams.b count]);
+}
+
 - (void)newFaceWithImage:(UIImage*)image
 {
     NSLog(@"ControlMain:newFaceWithImage");
@@ -56,8 +68,8 @@ static int theCount = 0;
     // ------------------------------------------------------
     // perform test by matching a new shape to the existing shape
 //    PDMShape *tmpShape = [shapeModel.meanShape getCopy];
-//    TMatch T = [tmpShape matchShapeTo:face.shape];
-//    [tmpShape transformAffineMatch:T];
+//    PDMTMat *T = [tmpShape findAlignTransformationTo:face.shape];
+//    [tmpShape transformAffineMat:T];
 //    face.shape  = tmpShape;
     
     
@@ -74,10 +86,11 @@ static int theCount = 0;
 //    [newShape transformAffineMatch:T];
 //    face.shape  = newShape;
     
-    
-    
-    
-    
+    // ------------------------------------------------------
+    // perform test by modifying modes
+    PDMShapeParameter *params = [shapeModel findBestMatchingParams:face.shape];
+    PDMShape *tmpShape = [shapeModel createNewShapeWithAllParams:params];
+    face.shape = tmpShape;
     
 }
 

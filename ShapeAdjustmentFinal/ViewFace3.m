@@ -77,5 +77,67 @@
     CGContextStrokePath(context);
 }
 
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{   
+    NSArray *touchesArray = [touches allObjects];
+    for(NSInteger j = 0; j < [touchesArray count]; ++j) {
+        if (![activeTouches containsObject:[touchesArray objectAtIndex:j]]) {
+            [activeTouches addObject:[touchesArray objectAtIndex:j]];
+        };
+    }
+    
+    int touchesCount = [activeTouches count];
+    NSLog(@"Touch Count = %i", touchesCount);
+    
+    if(touchesCount == 1) {
+        firstTouchStart = [NSDate date];
+    }
+    NSDate *touchTime = [NSDate date];
+    double dt = [touchTime timeIntervalSinceDate:firstTouchStart];
+    
+    
+    if(touchesCount == 1 && touchMode == TOUCH_V3_NONE)
+    {
+        NSLog(@"set mode to translate");
+        touchMode = TOUCH_V3_MODIFY;
+        UITouch * touch = [touches anyObject];
+        touchStartPos = [touch locationInView:self];
+    }
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    if(touchMode == TOUCH_V3_MODIFY)
+    {
+        NSLog(@"Modify shape!!!");
+        UITouch *touch = [activeTouches objectAtIndex:0];
+        CGPoint p = [touch locationInView:self];
+        
+        float dx = (p.x-touchStartPos.x)/scale;
+        float dy = -(p.y-touchStartPos.y)/scale;
+    }
+    
+    [self setNeedsDisplay];
+    
+}
+
+/**
+ Called when a touch ends
+ */
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    // remove the touch from the list of active touches
+    NSArray *touchesArray = [touches allObjects];
+    for(NSInteger j = 0; j < [touchesArray count]; ++j) {
+        NSUInteger ind = [activeTouches indexOfObject:[touchesArray objectAtIndex:j]];
+        
+        if(ind == 0 && touchMode == TOUCH_V3_MODIFY)
+            touchMode = TOUCH_V3_NONE;
+        
+        if(ind != NSNotFound)
+            [activeTouches removeObjectAtIndex:ind];
+    }
+}
+
 
 @end
