@@ -47,7 +47,6 @@ static int theCount = 0;
     float s1 = image.size.width/box.size.width;
     float s2 = image.size.height/box.size.height;
     float s = MIN(s1, s2)/2;
-    NSLog(@"Scale = %f", s);
     [face.shape scale:s];
     
     // translate shape to image center

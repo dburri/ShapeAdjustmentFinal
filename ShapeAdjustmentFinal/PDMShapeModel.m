@@ -12,6 +12,7 @@
 
 @synthesize meanShape;
 @synthesize num_vecs;
+@synthesize num_triangles;
 
 - (id)init 
 {
@@ -31,7 +32,7 @@
 }
 
 
-- (PDMShape*)createNewShape:(NSArray*)b
+- (PDMShape*)createNewShapeWithParams:(NSArray*)b
 {
     if([b count] != num_vecs) {
         NSLog(@"The number of parameters (%i) must match the number of vectors (%zu)! ", [b count], num_vecs);
@@ -88,15 +89,19 @@
     meanShape = [[PDMShape alloc] init];
     [meanShape loadShape:fXM];
 
-    // load eigenvectors
+    // load eigenvectors and eigenvalues
     [self loadEigVectors:fV];
+    [self loadEigValues:fD];
+    
+    // load triangles
+    [self loadTriangles:fTRI];
 
 }
 
 
 - (void)loadEigVectors:(NSString*)file
 {
-    NSLog(@"PDMShapeModel:loadEigVectors");
+    //NSLog(@"PDMShapeModel:loadEigVectors");
     
     NSError* err;
     NSString *path = [[NSBundle mainBundle] pathForResource:file ofType:@"csv"];
@@ -114,11 +119,12 @@
     NSArray *colArray = [[rowArray objectAtIndex:0] componentsSeparatedByString:@","];
     
     num_points = ([rowArray count]-1)/2;
-    num_vecs = ([colArray count]-1);
-    NSLog(@"Number of points = %zu, number of vectors = %zu", num_points, num_vecs);
+    num_vecs = ([colArray count]);
+    
     eigVecs = malloc(3*num_points*num_vecs*sizeof(float));
     if(eigVecs == NULL) {
         NSLog(@"Could not allocate memory to store eigenvectors!");
+        return;
     }
     
     float *data_ptr = &eigVecs[0];
@@ -143,13 +149,93 @@
             *data_ptr++ = 0;
         }
     }
+}
+
+- (void)loadEigValues:(NSString*)file
+{
+    //NSLog(@"PDMShapeModel:loadEigVectors");
+    
+    NSError* err;
+    NSString *path = [[NSBundle mainBundle] pathForResource:file ofType:@"csv"];
+    NSString *dataStr = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&err];
+    
+    if(dataStr == nil) {
+        NSLog(@"Error reading file at %@\n%@", path, [err localizedFailureReason]);
+    }
+    
+    NSArray *rowArray = [dataStr componentsSeparatedByString:@"\n"];
+    if([rowArray count] == 0) {
+        NSLog(@"Could not load file with Eigenvectors! File is empty...");
+        return;
+    }
+ 
+    size_t num_values = ([rowArray count]-1);
+    
+    if(num_values != num_vecs) {
+        NSLog(@"The number of eigenvectors (%zu) is not equal to the number of eigenvalues %zu!", num_vecs, num_values);
+    }
+    
+    eigVals = malloc(3*num_vecs*sizeof(float));
+    if(eigVals == NULL) {
+        NSLog(@"Could not allocate memory to store eigenvalues!");
+        return;
+    }
+    
+    float *data_ptr = &eigVals[0];
+    for(int i = 0; i < num_vecs; ++i)
+    {
+        *data_ptr++ = [[rowArray objectAtIndex:i] floatValue];
+    }
     
     
-    //for(int i = 0; i < 200; ++i) {
-    //    NSLog(@"%i: %f, ", i, eigVecs[i]);
-    //}
+//    for(int i = 0; i < 5; ++i) {
+//        NSLog(@"%i: %f, ", i, eigVals[i]);
+//    }
     
     
 }
+
+
+- (void)loadTriangles:(NSString*)file
+{
+    //NSLog(@"PDMShapeModel:loadEigVectors");
+    
+    NSError* err;
+    NSString *path = [[NSBundle mainBundle] pathForResource:file ofType:@"csv"];
+    NSString *dataStr = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&err];
+    
+    if(dataStr == nil) {
+        NSLog(@"Error reading file at %@\n%@", path, [err localizedFailureReason]);
+    }
+    
+    NSArray *rowArray = [dataStr componentsSeparatedByString:@"\n"];
+    if([rowArray count] == 0) {
+        NSLog(@"Could not load file with Eigenvectors! File is empty...");
+        return;
+    }
+
+    num_triangles = [rowArray count]-1;
+    
+    triangles = malloc(num_triangles*sizeof(triangle_t));
+    if(triangles == NULL) {
+        NSLog(@"Could not allocate memory to store triangles!");
+    }
+    
+    for(int i = 0; i < num_triangles; ++i)
+    {
+        NSArray *colArray = [[rowArray objectAtIndex:i] componentsSeparatedByString:@","];
+        for(int j = 0; j < 3; ++j) {
+            triangles[i].tri[j] = [[colArray objectAtIndex:j] intValue];
+        }
+    }
+    
+    
+    for(int i = 0; i < 5; ++i) {
+        NSLog(@"[%i, %i, %i]", triangles[i].tri[0], triangles[i].tri[1], triangles[i].tri[2]);
+    }
+    
+    
+}
+
 
 @end

@@ -8,14 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import <Accelerate/Accelerate.h>
+#import "PDMTMat.h"
 
-typedef struct TMatch {
-    float a, b, tx, ty;
-} TMatch;
-
-typedef struct TMat {
-    float *a1, *a2, *a3, *a4, *a5, *a6;
-} TMat;
 
 @interface PDMShape : NSObject
 {
@@ -40,8 +34,8 @@ typedef struct TMat {
 - (void)translate:(float)tx:(float)ty;
 
 - (void)transformAffine:(float*)T;
-- (void)transformAffineMatch:(TMatch)T;
+- (void)transformAffineMat:(PDMTMat*)T;
 
-- (TMatch)alignShapeTo:(PDMShape*)s;
+- (PDMTMat*)alignShapeTo:(PDMShape*)s;
 
 @end

@@ -15,7 +15,6 @@
     PDMShapeModel *shapeModel;
     Face *face;
     int count;
-
 }
 + (int)count;
 

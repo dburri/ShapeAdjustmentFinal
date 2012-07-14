@@ -224,27 +224,27 @@
     free(tmpShape);
 }
 
-- (void)transformAffineMatch:(TMatch)T
+- (void)transformAffineMat:(PDMTMat*)T
 {
-    float mat[9];
+//    float mat[9];
+//    
+//    mat[0] = T.a;
+//    mat[1] = T.b;
+//    mat[2] = 0;
+//    mat[3] = -T.b;
+//    mat[4] = T.a;
+//    mat[5] = 0;
+//    mat[6] = T.tx;
+//    mat[7] = T.ty;
+//    mat[8] = 1;
     
-    mat[0] = T.a;
-    mat[1] = T.b;
-    mat[2] = 0;
-    mat[3] = -T.b;
-    mat[4] = T.a;
-    mat[5] = 0;
-    mat[6] = T.tx;
-    mat[7] = T.ty;
-    mat[8] = 1;
-    
-    [self transformAffine:mat];
+    [self transformAffine:T.T];
 }
 
 
-- (TMatch)alignShapeTo:(PDMShape*)s
+- (PDMTMat*)alignShapeTo:(PDMShape*)s
 {
-    NSLog(@"Find matching transformation");
+    //NSLog(@"Find matching transformation");
     double a = 0;
     double b = 0;
     double c = 0;
@@ -262,16 +262,24 @@
     
     CGPoint g = [s getCenterOfGravity];
     
-    TMatch match;
-    match.a = (float)(a/c);
-    match.b = (float)(b/c);
-    match.tx = g.x;
-    match.ty = g.y;
+    PDMTMat *mat = [[PDMTMat alloc] init];
+    a = (float)(a/c);
+    b = (float)(b/c);
+    
+    mat.T[0] = a;
+    mat.T[1] = b;
+    mat.T[2] = 0;
+    mat.T[3] = -b;
+    mat.T[4] = a;
+    mat.T[5] = 0;
+    mat.T[6] = g.x;
+    mat.T[7] = g.y;
+    mat.T[8] = 1;
     
     //NSLog(@"match: a = %f, b = %f, tx = %f, ty = %f", match.a, match.b, match.tx, match.ty);
     //NSLog(@"match: s = %f, r = %f", sqrt(pow(match.a,2)+pow(match.b,2)), atan2(match.b, match.a));
     
-    return match;
+    return mat;
 }
 
 @end

@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "ControlMain.h"
 #import "ViewFace.h"
+#import "ViewController2.h"
 
 @interface ViewController : UIViewController < UIImagePickerControllerDelegate, UINavigationControllerDelegate >
 {

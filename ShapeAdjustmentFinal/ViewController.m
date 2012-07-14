@@ -20,6 +20,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    NSLog(@"viewDidLoad...mainController = %@", mainController);
 	// Do any additional setup after loading the view, typically from a nib.
 }
 
@@ -32,6 +33,14 @@
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
+}
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
+    if([[segue identifier] isEqualToString:@"View1ToView2"]) {
+        ViewController2 *VC = (ViewController2*)[segue destinationViewController];
+        VC.mainController = self.mainController;
+        NSLog(@"Transition to the second view");
+    }
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info

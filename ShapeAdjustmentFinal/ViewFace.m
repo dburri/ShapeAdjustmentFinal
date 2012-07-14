@@ -17,7 +17,6 @@
         NSLog(@"ViewFace:initWithFrame");
         activeTouches = [[NSMutableArray alloc] init];
         tmpShape = [PDMShape alloc];
-        //[self setMultipleTouchEnabled:YES];
     }
     return self;
 }
@@ -29,7 +28,6 @@
         NSLog(@"ViewFace:initWithCoder");
         activeTouches = [[NSMutableArray alloc] init];
         tmpShape = [PDMShape alloc];
-        //[self setMultipleTouchEnabled:YES];
     }
     return self;
 }
@@ -69,16 +67,6 @@
     //NSLog(@"Draw Rect");
     
     CGContextRef context = UIGraphicsGetCurrentContext();
-    CGContextSetInterpolationQuality(context, kCGInterpolationLow);
-    
-//    float xf = face.image.size.width/rect.size.width;
-//    float yf = face.image.size.height/rect.size.height;
-//    float m = MIN(xf, yf);
-//    xf /= m;
-//    yf /= m;
-//    CGContextTranslateCTM(context, 0, rect.size.height);
-//    CGContextScaleCTM(context, xf, -yf);
-    
     
     CGRect imgRect = CGRectMake(0, 0, tmpImage.size.width, tmpImage.size.height);
     [tmpImage drawInRect:imgRect];
