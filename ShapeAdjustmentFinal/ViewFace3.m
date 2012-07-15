@@ -10,11 +10,27 @@
 
 @implementation ViewFace3
 
+@synthesize model;
+@synthesize param;
+
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
-        // Initialization code
+        NSLog(@"ViewFace:initWithFrame");
+        activeTouches = [[NSMutableArray alloc] init];
+        tmpShape = [PDMShape alloc];
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)decoder
+{
+    self = [super initWithCoder:decoder];
+    if (self) {
+        NSLog(@"ViewFace:initWithCoder");
+        activeTouches = [[NSMutableArray alloc] init];
+        tmpShape = [PDMShape alloc];
     }
     return self;
 }
@@ -37,6 +53,8 @@
     [face.image drawInRect:CGRectMake(0, 0, imgSize.width, imgSize.height)];
     tmpImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
+    
+    [tmpShape setNewShapeData:face.shape];
 }
 
 
@@ -65,8 +83,8 @@
         CGContextSetFillColorWithColor(context, [UIColor greenColor].CGColor);
         for(int i = 0; i < face.shape.num_points*3; i+=3)
         {
-            CGPoint p = CGPointMake(face.shape.shape[i]*scale, face.shape.shape[i+1]*scale);
-            CGContextFillEllipseInRect(context, CGRectMake(p.x, self.frame.size.height-p.y, 5, 5));
+            CGPoint p = CGPointMake(face.shape.shape[i]*scale, self.frame.size.height-face.shape.shape[i+1]*scale);
+            CGContextFillEllipseInRect(context, CGRectMake(p.x, p.y, 5, 5));
             //NSLog(@"x = %f, y = %f", p.x, p.y);
         }
     }
@@ -102,6 +120,7 @@
         touchMode = TOUCH_V3_MODIFY;
         UITouch * touch = [touches anyObject];
         touchStartPos = [touch locationInView:self];
+        touchLastPos = [touch locationInView:self];
     }
 }
 
@@ -109,12 +128,42 @@
 {
     if(touchMode == TOUCH_V3_MODIFY)
     {
-        NSLog(@"Modify shape!!!");
+        NSLog(@"Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! ");
         UITouch *touch = [activeTouches objectAtIndex:0];
         CGPoint p = [touch locationInView:self];
         
-        float dx = (p.x-touchStartPos.x)/scale;
-        float dy = -(p.y-touchStartPos.y)/scale;
+        float dx = (p.x-touchLastPos.x)/scale;
+        float dy = -(p.y-touchLastPos.y)/scale;
+        
+        // find points to shift
+        float rad = 100;
+        for(int i = 0; i < 3*face.shape.num_points; i += 3)
+        {
+            CGPoint ps = CGPointMake(face.shape.shape[i]*scale, self.frame.size.height-face.shape.shape[i+1]*scale);
+            
+            float dist2 = ((ps.x - p.x) * (ps.x - p.x) + (ps.y - p.y) * (ps.y - p.y));
+            float dist = sqrt(dist2);
+            
+            
+            // move points
+            float intensity = 0;
+            if(dist < rad)
+            {
+                intensity = (rad-dist)/rad;
+                intensity = (intensity < 0 ? 0 : intensity);
+                intensity = (intensity > 1 ? 1 : intensity);
+                face.shape.shape[i] += dx*intensity;
+                face.shape.shape[i+1] += dy*intensity;
+            }
+        }
+        
+        // apply model
+        PDMShapeParameter *params = [model findBestMatchingParams:face.shape];
+        params = [model applyConstraintsToParams:params];
+        PDMShape *tmpS = [model createNewShapeWithAllParams:params];
+        face.shape = tmpS;
+        
+        touchLastPos = p;
     }
     
     [self setNeedsDisplay];
@@ -137,6 +186,7 @@
         if(ind != NSNotFound)
             [activeTouches removeObjectAtIndex:ind];
     }
+    [tmpShape setNewShapeData:face.shape];
 }
 
 

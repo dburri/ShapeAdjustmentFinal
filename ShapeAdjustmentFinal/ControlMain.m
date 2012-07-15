@@ -88,9 +88,9 @@ static int theCount = 0;
     
     // ------------------------------------------------------
     // perform test by modifying modes
-    PDMShapeParameter *params = [shapeModel findBestMatchingParams:face.shape];
-    PDMShape *tmpShape = [shapeModel createNewShapeWithAllParams:params];
-    face.shape = tmpShape;
+//    PDMShapeParameter *params = [shapeModel findBestMatchingParams:face.shape];
+//    PDMShape *tmpShape = [shapeModel createNewShapeWithAllParams:params];
+//    face.shape = tmpShape;
     
 }
 

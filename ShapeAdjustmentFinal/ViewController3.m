@@ -26,10 +26,9 @@
     if(mainController)
     {
         [faceView setNewFace:mainController.face];
-        b = [[NSMutableArray alloc] init];
-        for(int i = 0; i < mainController.shapeModel.num_vecs; ++i) {
-            [b addObject:[NSNumber numberWithFloat:0]];
-        }
+        faceView.model = mainController.shapeModel;
+        faceView.param = mainController.shapeParams;
+        
         tmpShape = mainController.face.shape;
     }
 }

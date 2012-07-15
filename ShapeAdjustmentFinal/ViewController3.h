@@ -14,9 +14,7 @@
 @interface ViewController3 : UIViewController
 {
     ControlMain *mainController;
-    NSMutableArray *b;
     PDMShape *tmpShape;
-    
     IBOutlet ViewFace3 *faceView;
 }
 

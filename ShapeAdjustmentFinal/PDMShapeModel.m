@@ -149,9 +149,35 @@
     
     for(int i = 0; i < num_vecs; ++i) {
         [params.b replaceObjectAtIndex:i withObject:[NSNumber numberWithFloat:bParams[i]]];
-        NSLog(@"%i: %f", i, bParams[i]);
+    }
+    free(bParams);
+    free(difference);
+    
+    return params;
+}
+
+
+- (PDMShapeParameter*)applyConstraintsToParams:(PDMShapeParameter*)params
+{
+    float dmax = 100;
+    float dm = 0;
+    float bval = 0;
+    
+    for(int i = 0; i < num_vecs; ++i)
+    {
+        bval = [[params.b objectAtIndex:i] floatValue];
+        dm += (bval*bval/eigVals[i]);
     }
     
+    if(dm > dmax)
+    {
+        for(int i = 0; i < num_vecs; ++i)
+        {
+            bval = [[params.b objectAtIndex:i] floatValue];
+            bval = bval * sqrt(dmax)/sqrt(dm);
+            [params.b replaceObjectAtIndex:i withObject:[NSNumber numberWithFloat:bval]];
+        }
+    }
     return params;
 }
 

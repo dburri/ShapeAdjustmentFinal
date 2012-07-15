@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "Face.h"
-
+#import "PDMShapeModel.h"
 
 typedef enum 
 {
@@ -19,17 +19,26 @@ typedef enum
 @interface ViewFace3 : UIView
 {
     Face *face;
+    PDMShapeModel *model;
+    PDMShapeParameter *param;
+    
     UIImage *tmpImage;
+    PDMShape *tmpShape;
+    
     float scale;
     
     TouchModeView3 touchMode;
     CGPoint touchStartPos;
+    CGPoint touchLastPos;
     float touchStartDistance;
     float touchStartAngle;
     
     NSMutableArray *activeTouches;
     NSDate *firstTouchStart;
 }
+
+@property (retain) PDMShapeModel *model;
+@property (retain) PDMShapeParameter *param;
 
 - (void)setNewFace:(Face*)f;
 - (void)updateShape:(PDMShape*)s;

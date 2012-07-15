@@ -36,6 +36,7 @@ typedef struct triangle_t {
 - (void)loadModel:(NSString*)fXM :(NSString*)fV :(NSString*)fD :(NSString*)fTRI;
 - (PDMShape*)createNewShapeWithParams:(NSArray*)b;
 - (PDMShape*)createNewShapeWithAllParams:(PDMShapeParameter*)params;
+- (PDMShapeParameter*)applyConstraintsToParams:(PDMShapeParameter*)params;
 - (PDMShapeParameter*)findBestMatchingParams:(PDMShape*)s;
 
 - (void)loadEigVectors:(NSString*)file;

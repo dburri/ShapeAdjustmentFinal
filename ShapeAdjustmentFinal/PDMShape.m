@@ -47,7 +47,7 @@
 
 - (void)setNewShapeData:(PDMShape *)s
 {
-    NSLog(@"PDMShape:setNewShapeData");
+    //NSLog(@"PDMShape:setNewShapeData");
     
     if(!shape)
         shape = malloc(3*s.num_points*sizeof(float));
