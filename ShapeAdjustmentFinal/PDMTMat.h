@@ -18,9 +18,5 @@
 - (PDMTMat*)multiply:(PDMTMat*)T2;
 - (PDMTMat*)inverse;
 
-
-- (void)inverseMatd:(double*)A:(long)N;
-- (void)inverseMatf:(const float*)A:(long)N:(float*)B;
-
 @end
 

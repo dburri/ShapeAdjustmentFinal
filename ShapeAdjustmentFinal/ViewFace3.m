@@ -85,14 +85,16 @@
         {
             CGPoint p = CGPointMake(face.shape.shape[i]*scale, self.frame.size.height-face.shape.shape[i+1]*scale);
             CGContextFillEllipseInRect(context, CGRectMake(p.x, p.y, 5, 5));
-            //NSLog(@"x = %f, y = %f", p.x, p.y);
         }
     }
-
-    CGContextSetLineWidth(context, 3.0f);
-    CGContextSetStrokeColorWithColor(context, [UIColor greenColor].CGColor);
-    CGContextAddRect(context,CGRectMake(100, 200, 120, 220));
-    CGContextStrokePath(context);
+    
+    CGContextSetRGBFillColor(context, 0.0, 1.0, 0.0, 0.5);
+    for(int i = 0; i < [activeTouches count]; ++i)
+    {
+        UITouch *touch = [activeTouches objectAtIndex:i];
+        CGPoint p = [touch locationInView:self];
+        CGContextFillEllipseInRect(context, CGRectMake(p.x-50, p.y-50, 100, 100));
+    }
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -128,7 +130,6 @@
 {
     if(touchMode == TOUCH_V3_MODIFY)
     {
-        NSLog(@"Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! Modify shape!!! ");
         UITouch *touch = [activeTouches objectAtIndex:0];
         CGPoint p = [touch locationInView:self];
         
@@ -158,9 +159,9 @@
         }
         
         // apply model
-        PDMShapeParameter *params = [model findBestMatchingParams:face.shape];
-        params = [model applyConstraintsToParams:params];
-        PDMShape *tmpS = [model createNewShapeWithAllParams:params];
+        param = [model findBestMatchingParams:face.shape];
+        param = [model applyConstraintsToParams:param];
+        PDMShape *tmpS = [model createNewShapeWithAllParams:param];
         face.shape = tmpS;
         
         touchLastPos = p;
@@ -187,6 +188,7 @@
             [activeTouches removeObjectAtIndex:ind];
     }
     [tmpShape setNewShapeData:face.shape];
+    [self setNeedsDisplay];
 }
 
 

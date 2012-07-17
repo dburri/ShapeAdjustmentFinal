@@ -29,6 +29,8 @@
     NSLog(@"PDMShapeModel:dealloc");
     meanShape = nil;
     free(eigVecs);
+    free(eigVecs);
+    free(triangles);
 }
 
 
@@ -93,63 +95,90 @@
  */
 - (PDMShapeParameter*)findBestMatchingParams:(PDMShape*)s
 {
+    NSLog(@"FIND THE BEST MATCHIG PARAMS...");
+    
     PDMShapeParameter *params = [[PDMShapeParameter alloc] initWithSize:num_vecs];
-    PDMShape *tmpShape = [[PDMShape alloc] initWithData:meanShape];
     
-    // project Y into the model coordinate frame
-    PDMShape *s2 = [s getCopy];
-    params.T = [tmpShape findAlignTransformationTo:s];
-    PDMTMat *TInv = [params.T inverse];
-    [s2 transformAffineMat:TInv];
-    
-    // project y into the tangent space to x
-    [s2 transformIntoTangentSpaceTo:meanShape];
-    
-    // update model parameters
     float *bParams = malloc(num_vecs*sizeof(float));
-    memset(bParams, 0, num_vecs*sizeof(float));
     float *difference = malloc(num_points*3*sizeof(float));
     
-    float *data_ptr1 = meanShape.shape;
-    float *data_ptr2 = s2.shape;
-    float *data_ptr3 = difference;
-    for(int i = 0; i < num_points; ++i)
+    
+    for(int k = 0; k < 2; ++k)
     {
-        *data_ptr3++ = ((*data_ptr2++) - (*data_ptr1++));
-        *data_ptr3++ = ((*data_ptr2++) - (*data_ptr1++));
+        PDMShape *tmpShape = [self createNewShapeWithParams:params.b];
+    
+        // project Y into the model coordinate frame
+        PDMShape *s2 = [s getCopy];
+        params.T = [tmpShape findAlignTransformationTo:s];
+        PDMTMat *TInv = [params.T inverse];
+        [s2 transformAffineMat:TInv];
         
-        data_ptr1++;
-        data_ptr2++;
-        data_ptr3++;
+        // project y into the tangent space to x
+        [s2 transformIntoTangentSpaceTo:meanShape];
+        
+        // update model parameters
+        float *data_ptr1 = &meanShape.shape[0];
+        float *data_ptr2 = &s2.shape[0];
+        float *data_ptr3 = &difference[0];
+        for(int i = 0; i < num_points; ++i)
+        {
+            *data_ptr3++ = ((*data_ptr2++) - (*data_ptr1++));
+            *data_ptr3++ = ((*data_ptr2++) - (*data_ptr1++));
+            *data_ptr3++ = 0;
+            
+            data_ptr1++;
+            data_ptr2++;
+        }
+        
+        
+        memset(bParams, 0, num_vecs*sizeof(float));
+        
+//        NSMutableString *text = [[NSMutableString alloc] init];
+//        [text appendFormat:@"\nbParams = ["];
+//        for(int i = 0; i < num_vecs; ++i) {
+//            [text appendFormat:@"%f, ", bParams[i]];
+//        }
+//        [text appendFormat:@"]\n"];
+//        NSLog(@"%@", text);
+//        
+//        NSMutableString *text2 = [[NSMutableString alloc] init];
+//        [text2 appendFormat:@"\ndifference = "];
+//        for(int i = 0; i < 3*num_points; i+=3) {
+//            [text2 appendFormat:@"[%f, %f, %f] ", difference[i+0], difference[i+1], difference[i+2]];
+//        }
+//        [text2 appendFormat:@"]\n"];
+//        NSLog(@"%@", text2);
+        
+        
+        
+        int lda = num_vecs;
+        int ldb = 1;
+        int ldc = 1;
+        
+        float scale = 1.0;
+
+        cblas_sgemm(CblasRowMajor,
+                    CblasTrans,
+                    CblasNoTrans,
+                    num_vecs,       // num of rows in matrices A and C
+                    1,                  // num of col in matrices B and C
+                    3*num_points,           // Num of col in matrix A; number of rows in matrix B.
+                    scale,                  // alpha
+                    eigVecs,            // matrix A
+                    lda,                // size of the first dimension of matrix A
+                    difference,             // matrix B
+                    ldb,                // size of the first dimension of matrix B
+                    scale,                  // beta
+                    bParams,          // matrix C
+                    ldc                 // size of the first dimention of matrix C
+                    );
+        
+        
+        for(int i = 0; i < num_vecs; ++i) {
+            [params.b replaceObjectAtIndex:i withObject:[NSNumber numberWithFloat:bParams[i]]];
+        }
     }
     
-    
-    int lda = num_vecs;
-    int ldb = 1;
-    int ldc = 1;
-    
-    float scale = 1.0;
-    
-    cblas_sgemm(CblasRowMajor,
-                CblasTrans,
-                CblasNoTrans,
-                num_vecs,       // num of rows in matrices A and C
-                1,                  // num of col in matrices B and C
-                3*num_points,           // Num of col in matrix A; number of rows in matrix B.
-                scale,                  // alpha
-                eigVecs,            // matrix A
-                lda,                // size of the first dimension of matrix A
-                difference,             // matrix B
-                ldb,                // size of the first dimension of matrix B
-                scale,                  // beta
-                bParams,          // matrix C
-                ldc                 // size of the first dimention of matrix C
-                );
-    
-    
-    for(int i = 0; i < num_vecs; ++i) {
-        [params.b replaceObjectAtIndex:i withObject:[NSNumber numberWithFloat:bParams[i]]];
-    }
     free(bParams);
     free(difference);
     
@@ -159,7 +188,7 @@
 
 - (PDMShapeParameter*)applyConstraintsToParams:(PDMShapeParameter*)params
 {
-    float dmax = 100;
+    float dmax = 500;
     float dm = 0;
     float bval = 0;
     
@@ -227,6 +256,10 @@
     num_points = ([rowArray count]-1)/2;
     num_vecs = ([colArray count]);
     
+    if(eigVecs) {
+        free(eigVecs);
+    }
+    
     eigVecs = malloc(3*num_points*num_vecs*sizeof(float));
     if(eigVecs == NULL) {
         NSLog(@"Could not allocate memory to store eigenvectors!");
@@ -281,6 +314,10 @@
         NSLog(@"The number of eigenvectors (%zu) is not equal to the number of eigenvalues %zu!", num_vecs, num_values);
     }
     
+    if(eigVals) {
+        free(eigVals);
+    }
+    
     eigVals = malloc(3*num_vecs*sizeof(float));
     if(eigVals == NULL) {
         NSLog(@"Could not allocate memory to store eigenvalues!");
@@ -321,6 +358,10 @@
     }
 
     num_triangles = [rowArray count]-1;
+    
+    if(triangles) {
+        free(triangles);
+    }
     
     triangles = malloc(num_triangles*sizeof(triangle_t));
     if(triangles == NULL) {

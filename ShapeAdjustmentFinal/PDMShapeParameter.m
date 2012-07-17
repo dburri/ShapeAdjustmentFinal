@@ -43,4 +43,23 @@
     NSLog(@"PDMShapeParameter:dealloc");
 }
 
+- (void)printParams
+{
+    NSMutableString *text = [[NSMutableString alloc] init];
+    
+    [text appendFormat:@"T = ["];
+    for(int i = 0; i < 9; ++i) {
+        [text appendFormat:@"%f, ", T.T[i]];
+    }
+    [text appendFormat:@"] \n"];
+    
+    [text appendFormat:@"b = ["];
+    for(int i = 0; i < [b count]; ++i) {
+        [text appendFormat:@"%f, ", [[b objectAtIndex:i] floatValue]];
+    }
+    [text appendFormat:@"] \n"];
+    
+    NSLog(@"Shape Parameters:\n%@", text);
+}
+
 @end

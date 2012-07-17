@@ -49,8 +49,11 @@
 {
     //NSLog(@"PDMShape:setNewShapeData");
     
-    if(!shape)
-        shape = malloc(3*s.num_points*sizeof(float));
+    if(shape) {
+        free(shape);
+    }
+    
+    shape = malloc(3*s.num_points*sizeof(float));
     
     num_points = s.num_points;
     for(int i = 0; i < 3*num_points; ++i)
@@ -73,6 +76,9 @@
     
     num_points = ([dataArray count]-1)/2;
     size_t num_bytes = 3*num_points*sizeof(float);      // store as homogeneous
+    if(shape) {
+        free(shape);
+    }
     shape = malloc(num_bytes);
     float *shape_ptr = &shape[0];
     for(int i = 0; i < num_points; ++i)

@@ -98,38 +98,4 @@
 //    return TInv;
 }
 
-- (void)inverseMatd:(double*)A:(long)N
-{
-    long pivotArray[N];
-    long info;
-    double lapWS[N*N];
-    
-    long workLength = N*N;
-    long lda = N;
-    dgetrf_(&N, &N, A, &lda, pivotArray, &info);
-    dgetri_(&N, A, &N, pivotArray, lapWS, &workLength, &info);
-}
-
-
-- (void)inverseMatf:(const float*)A:(long)N:(float*)B
-{
-    // create temporary double array
-    double *At = malloc(N*N*sizeof(double));
-    const float *A_ptr = A;
-    double *At_ptr = At;
-    for(int i = 0; i < N*N; ++i)
-        *At_ptr++ = *A_ptr++;
-    
-    // calculate inverse mat
-    [self inverseMatd:At :N];
-    
-    // copy double array back
-    float *B_ptr = B;
-    At_ptr = At;
-    for(int i = 0; i < N*N; ++i)
-        *B_ptr++ = *At_ptr++;
-    
-    free(At);
-}
-
 @end

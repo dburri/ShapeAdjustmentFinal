@@ -19,6 +19,7 @@
 
 - (id)initWithSize:(int)s;
 
+- (void)printParams;
 
 @end
 
