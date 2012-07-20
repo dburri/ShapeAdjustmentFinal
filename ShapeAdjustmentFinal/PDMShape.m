@@ -87,7 +87,7 @@
     for(int i = 0; i < num_points; ++i)
     {
         *shape_ptr++ = [[dataArray objectAtIndex:i] doubleValue];
-        *shape_ptr++ = [[dataArray objectAtIndex:i+num_points] doubleValue];
+        *shape_ptr++ = -[[dataArray objectAtIndex:i+num_points] doubleValue];
         *shape_ptr++ = 1.0;
     }
 }

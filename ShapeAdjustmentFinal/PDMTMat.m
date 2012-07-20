@@ -16,7 +16,7 @@
 {
     self = [super init];
     if (self) {
-        NSLog(@"PDMTMat:init");
+        //NSLog(@"PDMTMat:init");
         T = malloc(9*sizeof(float));
         memset(&T[0], 0, 9*sizeof(float));
     }
@@ -27,7 +27,7 @@
 {
     self = [super init];
     if (self) {
-        NSLog(@"PDMTMat:init");
+        //NSLog(@"PDMTMat:init");
         T = malloc(9*sizeof(float));
         memset(&T[0], 0, 9*sizeof(float));
         T[0] = 1;
@@ -39,7 +39,7 @@
 
 - (void)dealloc
 {
-    NSLog(@"PDMTMat:dealloc");
+    //NSLog(@"PDMTMat:dealloc");
     free(T);
 }
 
@@ -91,11 +91,6 @@
     TInv.T[8] = det_1*(T[4]*T[0]-T[3]*T[1]);
     
     return TInv;
-    
-    
-//    PDMTMat *TInv = [[PDMTMat alloc] init];
-//    [self inverseMatf:T :3 :TInv.T];
-//    return TInv;
 }
 
 @end
