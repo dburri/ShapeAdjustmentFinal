@@ -10,14 +10,18 @@
 #import <Accelerate/Accelerate.h>
 #import "PDMTMat.h"
 
+typedef struct {
+    float pos[3];
+} point_t;
+
 
 @interface PDMShape : NSObject
 {
-    float *shape;
+    point_t *shape;
     size_t num_points;
 }
 
-@property (nonatomic, readonly) float *shape;
+@property (nonatomic, readonly) point_t *shape;
 @property (nonatomic, readonly) size_t num_points;
 
 - (id)initWithData:(PDMShape*)s;
@@ -39,5 +43,7 @@
 
 - (PDMTMat*)findAlignTransformationTo:(PDMShape*)s;
 - (void)alignShapeTo:(PDMShape*)s;
+
+- (void)printShapeValues;
 
 @end

@@ -11,8 +11,8 @@
 @implementation PDMShapeModel
 
 @synthesize meanShape;
+@synthesize triangles;
 @synthesize num_vecs;
-@synthesize num_triangles;
 
 - (id)init 
 {
@@ -30,7 +30,6 @@
     meanShape = nil;
     free(eigVecs);
     free(eigVecs);
-    free(triangles);
 }
 
 
@@ -341,8 +340,6 @@
 
 - (void)loadTriangles:(NSString*)file
 {
-    //NSLog(@"PDMShapeModel:loadEigVectors");
-    
     NSError* err;
     NSString *path = [[NSBundle mainBundle] pathForResource:file ofType:@"csv"];
     NSString *dataStr = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&err];
@@ -357,33 +354,21 @@
         return;
     }
 
-    num_triangles = [rowArray count]-1;
-    
-    if(triangles) {
-        free(triangles);
-    }
-    
-    triangles = malloc(num_triangles*sizeof(triangle_t));
-    if(triangles == NULL) {
-        NSLog(@"Could not allocate memory to store triangles!");
-    }
+    int num_triangles = [rowArray count]-1;
+    NSMutableArray *tmpArray = [[NSMutableArray alloc] init];
     
     for(int i = 0; i < num_triangles; ++i)
     {
         NSArray *colArray = [[rowArray objectAtIndex:i] componentsSeparatedByString:@","];
+        PDMTriangle *triangle = [[PDMTriangle alloc] init];
         for(int j = 0; j < 3; ++j) {
-            triangles[i].tri[j] = [[colArray objectAtIndex:j] intValue];
+            triangle.index[j] = [[colArray objectAtIndex:j] intValue] - 1;
         }
+        [tmpArray addObject:triangle]; 
     }
     
-    
-    for(int i = 0; i < 5; ++i) {
-        NSLog(@"[%i, %i, %i]", triangles[i].tri[0], triangles[i].tri[1], triangles[i].tri[2]);
-    }
-    
-    
+    triangles = tmpArray;
 }
-
 
 
 - (void)printEigVectors
@@ -402,20 +387,21 @@
     }
 }
 
-
-- (void)printShapeValues:(PDMShape*)s
+- (void)printTriangles
 {
-    // print shape values
-    for(int i = 0; i < 3*s.num_points; i+=3)
+    // print vectors
+    NSMutableString *tmp = [[NSMutableString alloc] init];
+    for(int i = 0; i < [triangles count]; ++i)
     {
-        NSMutableString *tmp = [[NSMutableString alloc] init];
-        [tmp appendFormat:@"P%i = [", i];
-        [tmp appendFormat:@"%f, ", s.shape[i+0]];
-        [tmp appendFormat:@"%f, ", s.shape[i+1]];
-        [tmp appendFormat:@"%f", s.shape[i+2]];
-        [tmp appendFormat:@"]"];
-        NSLog(@"%@", tmp);
+        [tmp appendFormat:@"TRI %i = [", i];
+        for(int j = 0; j < 3; ++j)
+        {
+            PDMTriangle *triangle = [triangles objectAtIndex:i];
+            [tmp appendFormat:@"%i, ", triangle.index[j]];
+        }
+        [tmp appendFormat:@"]\n"];
     }
+    NSLog(@"\n\n%@\n\n", tmp);
 }
 
 @end

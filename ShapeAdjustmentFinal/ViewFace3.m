@@ -81,9 +81,9 @@
         CGContextSetLineWidth(context, 3.0f);
         CGContextSetStrokeColorWithColor(context, [UIColor greenColor].CGColor);
         CGContextSetFillColorWithColor(context, [UIColor greenColor].CGColor);
-        for(int i = 0; i < face.shape.num_points*3; i+=3)
+        for(int i = 0; i < face.shape.num_points; ++i)
         {
-            CGPoint p = CGPointMake(face.shape.shape[i]*scale, self.frame.size.height-face.shape.shape[i+1]*scale);
+            CGPoint p = CGPointMake(face.shape.shape[i].pos[0]*scale, self.frame.size.height-face.shape.shape[i].pos[1]*scale);
             CGContextFillEllipseInRect(context, CGRectMake(p.x, p.y, 5, 5));
         }
     }
@@ -138,9 +138,9 @@
         
         // find points to shift
         float rad = 100;
-        for(int i = 0; i < 3*face.shape.num_points; i += 3)
+        for(int i = 0; i < face.shape.num_points; ++i)
         {
-            CGPoint ps = CGPointMake(face.shape.shape[i]*scale, self.frame.size.height-face.shape.shape[i+1]*scale);
+            CGPoint ps = CGPointMake(face.shape.shape[i].pos[0]*scale, self.frame.size.height-face.shape.shape[i].pos[1]*scale);
             
             float dist2 = ((ps.x - p.x) * (ps.x - p.x) + (ps.y - p.y) * (ps.y - p.y));
             float dist = sqrt(dist2);
@@ -153,8 +153,8 @@
                 intensity = (rad-dist)/rad;
                 intensity = (intensity < 0 ? 0 : intensity);
                 intensity = (intensity > 1 ? 1 : intensity);
-                face.shape.shape[i] += dx*intensity;
-                face.shape.shape[i+1] += dy*intensity;
+                face.shape.shape[i].pos[0] += dx*intensity;
+                face.shape.shape[i].pos[1] += dy*intensity;
             }
         }
         

@@ -77,9 +77,9 @@
         CGContextSetLineWidth(context, 3.0f);
         CGContextSetStrokeColorWithColor(context, [UIColor greenColor].CGColor);
         CGContextSetFillColorWithColor(context, [UIColor greenColor].CGColor);
-        for(int i = 0; i < face.shape.num_points*3; i+=3)
+        for(int i = 0; i < face.shape.num_points; ++i)
         {
-            CGPoint p = CGPointMake(face.shape.shape[i]*scale, face.shape.shape[i+1]*scale);
+            CGPoint p = CGPointMake(face.shape.shape[i].pos[0]*scale, face.shape.shape[i].pos[1]*scale);
             CGContextFillEllipseInRect(context, CGRectMake(p.x, self.frame.size.height-p.y, 5, 5));
             //NSLog(@"x = %f, y = %f", p.x, p.y);
         }

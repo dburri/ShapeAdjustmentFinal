@@ -10,9 +10,10 @@
 
 #import "PDMShape.h"
 #import "PDMShapeParameter.h"
+#import "PDMTriangle.h"
 
 typedef struct triangle_t {
-    int tri[3];
+    int index[3];
 } triangle_t;
 
 @interface PDMShapeModel : NSObject
@@ -24,13 +25,12 @@ typedef struct triangle_t {
     float *eigVecs;
     float *eigVals;
     
-    triangle_t *triangles;
-    size_t num_triangles;
+    NSArray *triangles;
 }
 
 @property (retain) PDMShape *meanShape;
+@property (retain) NSArray *triangles;
 @property size_t num_vecs;
-@property size_t num_triangles;
 
 
 - (void)loadModel:(NSString*)fXM :(NSString*)fV :(NSString*)fD :(NSString*)fTRI;
@@ -39,11 +39,13 @@ typedef struct triangle_t {
 - (PDMShapeParameter*)applyConstraintsToParams:(PDMShapeParameter*)params;
 - (PDMShapeParameter*)findBestMatchingParams:(PDMShape*)s;
 
+- (NSArray*)getTriangles;
+
 - (void)loadEigVectors:(NSString*)file;
 - (void)loadEigValues:(NSString*)file;
 - (void)loadTriangles:(NSString*)file;
 
 - (void)printEigVectors;
-- (void)printShapeValues:(PDMShape*)s;
+- (void)printTriangles;
 
 @end

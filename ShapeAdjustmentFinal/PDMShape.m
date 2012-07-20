@@ -53,11 +53,14 @@
         free(shape);
     }
     
-    shape = malloc(3*s.num_points*sizeof(float));
+    shape = malloc(s.num_points*sizeof(point_t));
     
     num_points = s.num_points;
-    for(int i = 0; i < 3*num_points; ++i)
-        shape[i] = s.shape[i];
+    for(int i = 0; i < num_points; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            shape[i].pos[j] = s.shape[i].pos[j];
+        }
+    }
 }
 
 
@@ -75,12 +78,12 @@
     NSArray *dataArray = [dataStr componentsSeparatedByString:@"\n"];
     
     num_points = ([dataArray count]-1)/2;
-    size_t num_bytes = 3*num_points*sizeof(float);      // store as homogeneous
+    size_t num_bytes = num_points*sizeof(point_t);      // store as homogeneous
     if(shape) {
         free(shape);
     }
     shape = malloc(num_bytes);
-    float *shape_ptr = &shape[0];
+    float *shape_ptr = &(shape[0].pos[0]);
     for(int i = 0; i < num_points; ++i)
     {
         *shape_ptr++ = [[dataArray objectAtIndex:i] doubleValue];
@@ -100,7 +103,7 @@
     float ymin = INFINITY;
     float ymax = -INFINITY;
     
-    float *shape_ptr = &shape[0];
+    float *shape_ptr = &(shape[0].pos[0]);
     float x, y;
     for(int i = 0; i < num_points; ++i)
     {
@@ -120,7 +123,7 @@
 {
     float x = 0;
     float y = 0;
-    float *shape_ptr = &shape[0];
+    float *shape_ptr = &(shape[0].pos[0]);
     for(int i = 0; i < num_points; ++i)
     {
         x += *shape_ptr++;
@@ -203,8 +206,8 @@
     int ldb = 3;
     
     float s = 1.0;
-    float *tmpShape = malloc(3*num_points*sizeof(float));
-    memset(tmpShape, 0, 3*num_points*sizeof(float));
+    float *tmpShape = malloc(num_points*sizeof(point_t));
+    memset(tmpShape, 0, num_points*sizeof(point_t));
     
     cblas_sgemm(CblasRowMajor,
                 CblasNoTrans,
@@ -213,7 +216,7 @@
                 3,              // num of col in matrices B and C
                 3,              // Num of col in matrix A; number of rows in matrix B.
                 s,              // alpha
-                shape,          // matrix A
+                &shape[0].pos[0],          // matrix A
                 lda,            // size of the first dimension of matrix A
                 T,              // matrix B
                 ldt,            // size of the first dimension of matrix B
@@ -222,7 +225,7 @@
                 ldb             // size of the first dimention of matrix C
                 );
     
-    float *shape_ptr = &shape[0];
+    float *shape_ptr = &shape[0].pos[0];
     float *tmpshape_ptr = &tmpShape[0];
     for(int i = 0; i < 3*num_points; ++i) {
         *shape_ptr++ = *tmpshape_ptr++;
@@ -241,8 +244,8 @@
     double a = 0;
     double b = 0;
     double c = 0;
-    const float *data_ptr1 = &shape[0];
-    const float *data_ptr2 = &(s.shape[0]);
+    const float *data_ptr1 = &shape[0].pos[0];
+    const float *data_ptr2 = &(s.shape[0].pos[0]);
     for(int i = 0; i < num_points; ++i)
     {
         a += ((*data_ptr1) * (*data_ptr2) + (*(data_ptr1+1)) * (*(data_ptr2+1)));
@@ -284,8 +287,8 @@
 - (void)transformIntoTangentSpaceTo:(PDMShape*)s
 {
     float scale = 0;
-    float *data_ptr1 = &shape[0];
-    float *data_ptr2 = &s.shape[0];
+    float *data_ptr1 = &shape[0].pos[0];
+    float *data_ptr2 = &s.shape[0].pos[0];
     for(int i = 0; i < num_points; ++i)
     {
         scale += ((*data_ptr1++) * (*data_ptr2++));
@@ -296,7 +299,7 @@
     
     scale = 1/scale;
     
-    data_ptr1 = &shape[0];
+    data_ptr1 = &shape[0].pos[0];
     for(int i = 0; i < num_points; ++i)
     {
         (*data_ptr1++) *= scale;
@@ -305,6 +308,21 @@
     }
 }
 
+
+- (void)printShapeValues
+{
+    // print shape values
+    NSMutableString *tmp = [[NSMutableString alloc] init];
+    for(int i = 0; i < num_points; ++i)
+    {
+        [tmp appendFormat:@"P%i = [", i];
+        [tmp appendFormat:@"%f, ", shape[i].pos[0]];
+        [tmp appendFormat:@"%f, ", shape[i].pos[1]];
+        [tmp appendFormat:@"%f", shape[i].pos[2]];
+        [tmp appendFormat:@"]\n"];
+    }
+    NSLog(@"\n\n%@\n", tmp);
+}
 
 
 @end
