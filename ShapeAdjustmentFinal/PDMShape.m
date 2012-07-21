@@ -64,6 +64,18 @@
 }
 
 
+- (void)setNewShapeData:(point_t*)points :(int)nPoints
+{
+    //NSLog(@"PDMShape:setNewShapeData");
+    
+    if(shape) {
+        free(shape);
+    }
+    
+    shape = points;
+    num_points = nPoints;
+}
+
 - (void)loadShape:(NSString*)file {
     
     NSLog(@"PDMShape:loadShape");

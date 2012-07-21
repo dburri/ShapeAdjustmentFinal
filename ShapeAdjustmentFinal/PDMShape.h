@@ -29,6 +29,7 @@ typedef struct {
 - (void)loadShape:(NSString*)file;
 - (id)getCopy;
 - (void)setNewShapeData:(PDMShape*)s;
+- (void)setNewShapeData:(point_t*)points :(int)nPoints;
 
 - (CGRect)getMinBoundingBox;
 - (CGPoint)getCenterOfGravity;
