@@ -8,6 +8,8 @@
 
 #import "PDMShape.h"
 
+#undef DEBUG
+
 @implementation PDMShape
 
 @synthesize shape;
@@ -17,7 +19,10 @@
     self = [super init];
     if (self) {
         shape = NULL;
+        
+        #ifdef DEBUG
         NSLog(@"PDMShape:init");
+        #endif
     }
     return self;
 }
@@ -26,7 +31,10 @@
 {
     self = [super init];
     if (self) {
+        #ifdef DEBUG
         NSLog(@"PDMShape:initWithData");
+        #endif
+        
         shape = NULL;
         [self setNewShapeData:s];
     }
@@ -34,7 +42,9 @@
 }
 
 - (void)dealloc {
+    #ifdef DEBUG
     NSLog(@"PDMShape:dealloc");
+    #endif
     free(shape);
 }
 
@@ -76,9 +86,12 @@
     num_points = nPoints;
 }
 
-- (void)loadShape:(NSString*)file {
+- (void)loadShape:(NSString*)file
+{
     
+    #ifdef DEBUG
     NSLog(@"PDMShape:loadShape");
+    #endif
     
     NSError* err;
     NSString *path = [[NSBundle mainBundle] pathForResource:file ofType:@"csv"];
