@@ -49,7 +49,7 @@
         params[i] = [[b objectAtIndex:i] floatValue];
     }
     
-    float *shapeData = shape.shape;
+    float *shapeData = &shape.shape[0].pos[0];
     
     int lda = num_vecs;
     int ldb = 1;
@@ -116,8 +116,8 @@
         [s2 transformIntoTangentSpaceTo:meanShape];
         
         // update model parameters
-        float *data_ptr1 = &meanShape.shape[0];
-        float *data_ptr2 = &s2.shape[0];
+        float *data_ptr1 = &(meanShape.shape[0].pos[0]);
+        float *data_ptr2 = &(s2.shape[0].pos[0]);
         float *data_ptr3 = &difference[0];
         for(int i = 0; i < num_points; ++i)
         {
