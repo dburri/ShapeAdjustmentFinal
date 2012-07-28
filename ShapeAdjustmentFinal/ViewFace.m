@@ -10,6 +10,9 @@
 
 @implementation ViewFace
 
+@synthesize delegate;
+
+
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
@@ -35,28 +38,35 @@
 
 - (void)dealloc
 {
-    face = nil;
+    
 }
 
 
-- (void)setNewFace:(Face*)f
+- (void)setFaceImage:(UIImage*)img
 {
-    face = f;
     
     CGSize viewSize = self.frame.size;
     
-    float s1 = face.image.size.width/viewSize.width;
-    float s2 = face.image.size.height/viewSize.height;
+    float s1 = img.size.width/viewSize.width;
+    float s2 = img.size.height/viewSize.height;
     scale = 1/MAX(s1,s2);
     
-    CGSize imgSize = CGSizeMake(scale*face.image.size.width, scale*face.image.size.height);
+    CGSize imgSize = CGSizeMake(scale*img.size.width, scale*img.size.height);
     
     UIGraphicsBeginImageContext(imgSize);
-    [face.image drawInRect:CGRectMake(0, 0, imgSize.width, imgSize.height)];
+    [img drawInRect:CGRectMake(0, 0, imgSize.width, imgSize.height)];
     tmpImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
+}
+
+
+- (void)setFaceShapeParams:(PDMShape*)shape :(PDMTMat*)TMat
+{
+    origShape = shape;
+    origTMat = TMat;
     
-    [tmpShape setNewShapeData:face.shape];
+    tmpShape = [origShape getCopy];
+    [tmpShape transformAffineMat:origTMat];
 }
 
 
@@ -64,32 +74,27 @@
 // An empty implementation adversely affects performance during animation.
 - (void)drawRect:(CGRect)rect
 {
-    //NSLog(@"Draw Rect");
-    
     CGContextRef context = UIGraphicsGetCurrentContext();
     
     CGRect imgRect = CGRectMake(0, 0, tmpImage.size.width, tmpImage.size.height);
     [tmpImage drawInRect:imgRect];
 
     
-    if(face.shape)
+    if(tmpShape)
     {
         CGContextSetLineWidth(context, 3.0f);
         CGContextSetStrokeColorWithColor(context, [UIColor greenColor].CGColor);
         CGContextSetFillColorWithColor(context, [UIColor greenColor].CGColor);
-        for(int i = 0; i < face.shape.num_points; ++i)
+        for(int i = 0; i < tmpShape.num_points; ++i)
         {
-            CGPoint p = CGPointMake(face.shape.shape[i].pos[0]*scale, face.shape.shape[i].pos[1]*scale);
-            CGContextFillEllipseInRect(context, CGRectMake(p.x, self.frame.size.height-p.y, 5, 5));
-            //NSLog(@"x = %f, y = %f", p.x, p.y);
+            CGRect rect = CGRectMake(
+                tmpShape.shape[i].pos[0]*scale,
+                tmpShape.shape[i].pos[1]*scale,
+                5, 5
+            );
+            CGContextFillEllipseInRect(context, rect);
         }
     }
-    
-
-//    CGContextSetLineWidth(context, 3.0f);
-//    CGContextSetStrokeColorWithColor(context, [UIColor blueColor].CGColor);
-//    CGContextAddRect(context,CGRectMake(80, 80, 120, 120));
-//    CGContextStrokePath(context);
 }
 
 
@@ -134,6 +139,8 @@
         touchStartDistance = sqrtf( powf(p1.x-p2.x,2) + powf(p1.y-p2.y,2));
         touchStartAngle = atan2f(p1.x-p2.x, p1.y-p2.y);
     }
+    
+    tmpTMat = [[PDMTMat alloc] initWithMat:origTMat];
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
@@ -145,10 +152,10 @@
         CGPoint p = [touch locationInView:self];
         
         float dx = (p.x-touchStartPos.x)/scale;
-        float dy = -(p.y-touchStartPos.y)/scale;
+        float dy = (p.y-touchStartPos.y)/scale;
         
-        [face.shape setNewShapeData:tmpShape];
-        [face.shape translate:dx :dy];
+        PDMTMat *matT = [[PDMTMat alloc] initWithTranslate:dx :dy];
+        tmpTMat = [origTMat multiply:matT];
     }
     
     else if(touchMode == TOUCH_SCALE_SHAPE)
@@ -163,21 +170,20 @@
         CGPoint p = CGPointMake((p1.x+p2.x)/2, (p1.y+p2.y)/2);
         
         float dx = (p.x-touchStartPos.x)/scale;
-        float dy = -(p.y-touchStartPos.y)/scale;
+        float dy = (p.y-touchStartPos.y)/scale;
         
         float touchDistance = sqrtf( powf(p1.x-p2.x,2) + powf(p1.y-p2.y,2));
         float s = touchDistance/touchStartDistance;
         float touchAngle = atan2f(p1.x-p2.x, p1.y-p2.y);
-        float a = touchAngle - touchStartAngle;
-        NSLog(@"Angle = %f", a);
+        float a = touchStartAngle - touchAngle;
+        //NSLog(@"Angle = %f", a);
         
-        [face.shape setNewShapeData:tmpShape];
-        CGPoint center = [face.shape getCenterOfGravity];
-        [face.shape translate:-center.x :-center.y];
-        [face.shape scale:s];
-        [face.shape rotate:a];
-        [face.shape translate:center.x+dx :center.y+dy];
+        PDMTMat *matSRT = [[PDMTMat alloc] initWithSRT:s :a :dx :dy];
+        tmpTMat = [origTMat multiplyPreservingTranslation:matSRT];
     }
+    
+    [tmpShape setNewShapeData:origShape];
+    [tmpShape transformAffineMat:tmpTMat];
     
     [self setNeedsDisplay];
     
@@ -202,7 +208,9 @@
         if(ind != NSNotFound)
             [activeTouches removeObjectAtIndex:ind];
     }
-    [tmpShape setNewShapeData:face.shape];
+    
+    origTMat = tmpTMat;
+    [delegate updateShapeParameter:self newParams:origTMat];
 }
 
 @end

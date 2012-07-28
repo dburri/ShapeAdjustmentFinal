@@ -12,7 +12,8 @@
 
 @synthesize shapeModel;
 @synthesize shapeParams;
-@synthesize face;
+@synthesize faceShape;
+@synthesize faceImage;
 
 
 static int theCount = 0;
@@ -24,6 +25,7 @@ static int theCount = 0;
     self = [super init];
     if (self) {
         count = theCount++;
+        shapeParams = [[PDMShapeParameter alloc] init];
         NSLog(@"ControlMain:init:%i", count);
     }
     return self;
@@ -31,8 +33,6 @@ static int theCount = 0;
 
 - (void)dealloc {
     NSLog(@"ControlMain:dealloc:%i", count);
-    shapeModel = nil;
-    face = nil;
 }
 
 
@@ -50,20 +50,18 @@ static int theCount = 0;
 - (void)newFaceWithImage:(UIImage*)image
 {
     NSLog(@"ControlMain:newFaceWithImage");
-    face = nil;
-    face = [[Face alloc] init];
-    face.image = image;
-    face.shape = [shapeModel.meanShape getCopy];
+    faceImage = image;
+    faceShape = [shapeModel.meanShape getCopy];
     
     // scale the shape to half of the image size
-    CGRect box = [face.shape getMinBoundingBox];
+    CGRect box = [faceShape getMinBoundingBox];
     float s1 = image.size.width/box.size.width;
     float s2 = image.size.height/box.size.height;
     float s = MIN(s1, s2)/2;
-    [face.shape scale:s];
     
-    // translate shape to image center
-    [face.shape translate:image.size.height/2 :image.size.width/2];
+    shapeParams.T = [[PDMTMat alloc] initWithSRT:s :0 :image.size.height/2 :image.size.width/2];
+    [faceShape transformAffineMat:shapeParams.T];
+    
 
     // ------------------------------------------------------
     // perform test by matching a new shape to the existing shape
@@ -92,6 +90,37 @@ static int theCount = 0;
 //    PDMShape *tmpShape = [shapeModel createNewShapeWithAllParams:params];
 //    face.shape = tmpShape;
     
+}
+
+
+- (void)updateT:(PDMTMat*)T
+{
+    shapeParams.T = T;
+    faceShape = [shapeModel createNewShapeWithAllParams:shapeParams];
+}
+
+- (void)updateb:(NSArray*)b
+{
+    assert([b count] == [shapeParams.b count]);
+    [shapeParams.b setArray:b];
+    faceShape = [shapeModel createNewShapeWithAllParams:shapeParams];
+}
+
+
+- (void)update:(PDMShapeParameter*)param
+{
+    assert([param.b count] == [shapeParams.b count]);
+    [shapeParams.b setArray:param.b];
+    shapeParams.T = param.T;
+    faceShape = [shapeModel createNewShapeWithAllParams:shapeParams];
+}
+
+- (void)resetBParam
+{
+    for(int i = 0; i < [shapeParams.b count]; ++i) {
+        [shapeParams.b replaceObjectAtIndex:i withObject:[NSNumber numberWithFloat:0]];
+    }
+    faceShape = [shapeModel createNewShapeWithAllParams:shapeParams];
 }
 
 

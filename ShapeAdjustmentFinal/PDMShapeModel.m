@@ -45,8 +45,10 @@
     
     
     float *params = malloc(num_vecs*sizeof(float));
-    for(int i = 0; i < [b count]; ++i) {
-        params[i] = [[b objectAtIndex:i] floatValue];
+    int i = 0;
+    for (id val in b) {
+        params[i] = [val floatValue];
+        ++i;
     }
     
     float *shapeData = &shape.shape[0].pos[0];
@@ -94,7 +96,7 @@
  */
 - (PDMShapeParameter*)findBestMatchingParams:(PDMShape*)s
 {
-    NSLog(@"FIND THE BEST MATCHIG PARAMS...");
+    //NSLog(@"FIND THE BEST MATCHIG PARAMS...");
     
     PDMShapeParameter *params = [[PDMShapeParameter alloc] initWithSize:num_vecs];
     
@@ -185,7 +187,7 @@
 }
 
 
-- (PDMShapeParameter*)applyConstraintsToParams:(PDMShapeParameter*)params
+- (PDMShapeParameter*)applyConstraintsToParamsEllipse:(PDMShapeParameter*)params :(float)limit
 {
     float dmax = 500;
     float dm = 0;
@@ -205,6 +207,28 @@
             bval = bval * sqrt(dmax)/sqrt(dm);
             [params.b replaceObjectAtIndex:i withObject:[NSNumber numberWithFloat:bval]];
         }
+    }
+    return params;
+}
+
+
+- (PDMShapeParameter*)applyConstraintsToParamsCube:(PDMShapeParameter*)params :(float)limit
+{
+    float bval = 0;
+    
+    for(int i = 0; i < num_vecs; ++i)
+    {
+        bval = [[params.b objectAtIndex:i] floatValue];
+        float maxVal = limit*eigVals[i];
+        float sign = (bval >= 0 ? 1 : -1);
+        
+        //NSLog(@"b[%i] = %f, max = %f", i, bval, maxVal);
+        
+        if( maxVal < fabs(bval) ) {
+            [params.b replaceObjectAtIndex:i withObject:[NSNumber numberWithFloat:maxVal*sign]];
+        }
+        
+        
     }
     return params;
 }

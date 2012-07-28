@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "Face.h"
 #import "PDMShapeModel.h"
 
 typedef enum 
@@ -16,32 +15,48 @@ typedef enum
     TOUCH_V3_MODIFY
 } TouchModeView3;
 
+
+
+
+@class ViewFace3;
+
+@protocol View3NewShapeParametersDelegate
+- (void)updateShapeParameter:(PDMShapeParameter*)params;
+- (void)shapeModified:(PDMShape*)s;
+@end
+
+@interface TouchState : NSObject {
+    UITouch *touch;
+    CGPoint touchStartPos;
+    CGPoint touchLastPos;
+}
+
+@property (retain) UITouch *touch;
+@property CGPoint touchStartPos;
+@property CGPoint touchLastPos;
+
+@end
+
 @interface ViewFace3 : UIView
 {
-    Face *face;
-    PDMShapeModel *model;
-    PDMShapeParameter *param;
-    
     UIImage *tmpImage;
-    PDMShape *tmpShape;
+    PDMShape *faceShape;
     
     float scale;
     
     TouchModeView3 touchMode;
-    CGPoint touchStartPos;
-    CGPoint touchLastPos;
-    float touchStartDistance;
-    float touchStartAngle;
     
     NSMutableArray *activeTouches;
-    NSDate *firstTouchStart;
 }
+
+@property (nonatomic, weak) id <View3NewShapeParametersDelegate> delegate;
 
 @property (retain) PDMShapeModel *model;
 @property (retain) PDMShapeParameter *param;
 
-- (void)setNewFace:(Face*)f;
-- (void)updateShape:(PDMShape*)s;
+- (void)setFaceImage:(UIImage*)img;
+- (void)setShape:(PDMShape*)s;
+
 
 
 @end

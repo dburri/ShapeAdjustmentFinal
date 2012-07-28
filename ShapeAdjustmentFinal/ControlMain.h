@@ -9,23 +9,31 @@
 #import <UIKit/UIKit.h>
 
 #import "PDMShapeModel.h"
-#import "Face.h"
 
 @interface ControlMain : NSObject {
     PDMShapeModel *shapeModel;
     PDMShapeParameter *shapeParams;
-    Face *face;
+    
+    PDMShape *faceShape;
+    UIImage *faceImage;
+    
     int count;
 }
 + (int)count;
 
 @property (retain) PDMShapeModel *shapeModel;
-@property (retain) PDMShapeParameter *shapeParams;
-@property (retain) Face *face;
+@property (retain, readonly) PDMShapeParameter *shapeParams;
+@property (retain) UIImage *faceImage;
+@property (retain) PDMShape *faceShape;
 
 - (void)loadShapeModel:(NSString*)fXM :(NSString*)fV :(NSString*)fD :(NSString*)fTRI;
 
 - (void)newFaceWithImage:(UIImage*)image;
+
+- (void)updateT:(PDMTMat*)T;
+- (void)updateb:(NSArray*)b;
+- (void)update:(PDMShapeParameter*)param;
+- (void)resetBParam;
 
 
 @end

@@ -7,21 +7,16 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "Face.h"
 #import "PDMShapeModel.h"
 
 @interface ViewFace2 : UIView
 {
-    Face *face;
+    PDMShape *tmpShape;
     UIImage *tmpImage;
     float scale;
-    
-    //PDMShapeModel *shapeModel;
-    //PDMShape *tmpShape;
 }
 
-- (void)setNewFace:(Face*)f;
+- (void)setFaceImage:(UIImage*)img;
 - (void)updateShape:(PDMShape*)s;
-//- (void)setShapeModel:(PDMShapeModel*)model;
 
 @end

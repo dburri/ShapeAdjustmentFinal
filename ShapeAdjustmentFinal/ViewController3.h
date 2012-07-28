@@ -11,14 +11,29 @@
 #import "ViewFace3.h"
 #import "ViewController2.h"
 
-@interface ViewController3 : UIViewController
+@interface ViewController3 : UIViewController <View3NewShapeParametersDelegate>
 {
     ControlMain *mainController;
     PDMShape *tmpShape;
+    
+    float boundCube;
+    float boundEllipse;
+    
     IBOutlet ViewFace3 *faceView;
+    IBOutlet UISegmentedControl *segControl;
+    IBOutlet UISlider *slider;
+    IBOutlet UILabel *textField;
 }
 
 @property (retain) ControlMain *mainController;
 @property (retain) IBOutlet ViewFace3 *faceView;
+@property (retain) IBOutlet UISegmentedControl *segControl;
+@property (retain) IBOutlet UISlider *slider;
+@property (retain) IBOutlet UILabel *textField;
+
+- (IBAction)changeBoundMode:(id)sender;
+- (IBAction)changeBoundValue:(id)sender;
+- (IBAction)resetParams:(id)sender;
+
 
 @end

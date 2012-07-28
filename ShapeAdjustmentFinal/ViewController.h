@@ -11,7 +11,7 @@
 #import "ViewFace.h"
 #import "ViewController2.h"
 
-@interface ViewController : UIViewController < UIImagePickerControllerDelegate, UINavigationControllerDelegate >
+@interface ViewController : UIViewController < UIImagePickerControllerDelegate, UINavigationControllerDelegate, ViewNewParamsDelegate >
 {
     ControlMain *mainController;
     IBOutlet ViewFace *faceView;

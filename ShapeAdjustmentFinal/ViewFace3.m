@@ -8,10 +8,24 @@
 
 #import "ViewFace3.h"
 
+@implementation TouchState
+
+@synthesize touch;
+@synthesize touchLastPos;
+@synthesize touchStartPos;
+
+@end
+
+
+
 @implementation ViewFace3
+
+@synthesize delegate;
 
 @synthesize model;
 @synthesize param;
+
+
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -19,7 +33,6 @@
     if (self) {
         NSLog(@"ViewFace:initWithFrame");
         activeTouches = [[NSMutableArray alloc] init];
-        tmpShape = [PDMShape alloc];
     }
     return self;
 }
@@ -30,37 +43,32 @@
     if (self) {
         NSLog(@"ViewFace:initWithCoder");
         activeTouches = [[NSMutableArray alloc] init];
-        tmpShape = [PDMShape alloc];
     }
     return self;
 }
 
 
-- (void)setNewFace:(Face*)f
+- (void)setFaceImage:(UIImage*)img
 {
-    NSLog(@"ViewFace3:setNewFace");
-    face = f;
     
     CGSize viewSize = self.frame.size;
     
-    float s1 = face.image.size.width/viewSize.width;
-    float s2 = face.image.size.height/viewSize.height;
+    float s1 = img.size.width/viewSize.width;
+    float s2 = img.size.height/viewSize.height;
     scale = 1/MAX(s1,s2);
     
-    CGSize imgSize = CGSizeMake(scale*face.image.size.width, scale*face.image.size.height);
+    CGSize imgSize = CGSizeMake(scale*img.size.width, scale*img.size.height);
     
     UIGraphicsBeginImageContext(imgSize);
-    [face.image drawInRect:CGRectMake(0, 0, imgSize.width, imgSize.height)];
+    [img drawInRect:CGRectMake(0, 0, imgSize.width, imgSize.height)];
     tmpImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
-    
-    [tmpShape setNewShapeData:face.shape];
 }
 
 
-- (void)updateShape:(PDMShape*)s
+- (void)setShape:(PDMShape*)s
 {
-    face.shape = s;
+    faceShape = s;
     [self setNeedsDisplay];
 }
 
@@ -76,53 +84,58 @@
     CGRect imgRect = CGRectMake(0, 0, tmpImage.size.width, tmpImage.size.height);
     [tmpImage drawInRect:imgRect];
     
-    if(face.shape)
+    if(faceShape)
     {
         CGContextSetLineWidth(context, 3.0f);
         CGContextSetStrokeColorWithColor(context, [UIColor greenColor].CGColor);
         CGContextSetFillColorWithColor(context, [UIColor greenColor].CGColor);
-        for(int i = 0; i < face.shape.num_points; ++i)
+        for(int i = 0; i < faceShape.num_points; ++i)
         {
-            CGPoint p = CGPointMake(face.shape.shape[i].pos[0]*scale, self.frame.size.height-face.shape.shape[i].pos[1]*scale);
-            CGContextFillEllipseInRect(context, CGRectMake(p.x, p.y, 5, 5));
+            CGRect rect = CGRectMake(
+                                     faceShape.shape[i].pos[0]*scale,
+                                     faceShape.shape[i].pos[1]*scale,
+                                     5, 5
+                                     );
+            CGContextFillEllipseInRect(context, rect);
         }
     }
     
     CGContextSetRGBFillColor(context, 0.0, 1.0, 0.0, 0.5);
-    for(int i = 0; i < [activeTouches count]; ++i)
-    {
-        UITouch *touch = [activeTouches objectAtIndex:i];
-        CGPoint p = [touch locationInView:self];
+    for (TouchState *touchState in activeTouches) {
+        CGPoint p = [touchState.touch locationInView:self];
         CGContextFillEllipseInRect(context, CGRectMake(p.x-50, p.y-50, 100, 100));
     }
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {   
+    // add touch if this touch does not exist already
     NSArray *touchesArray = [touches allObjects];
-    for(NSInteger j = 0; j < [touchesArray count]; ++j) {
-        if (![activeTouches containsObject:[touchesArray objectAtIndex:j]]) {
-            [activeTouches addObject:[touchesArray objectAtIndex:j]];
-        };
+    for (UITouch *uiTouch in touchesArray) {
+        
+        BOOL exists = NO;
+        for (TouchState *touchState in activeTouches) {
+            if(touchState.touch == uiTouch) {
+                exists = YES;
+            }
+        }
+        
+        if(exists == NO) {
+            TouchState *newTouch = [[TouchState alloc] init];
+            
+            newTouch.touch = uiTouch;
+            newTouch.touchStartPos = [uiTouch locationInView:self];
+            newTouch.touchLastPos = [uiTouch locationInView:self];
+            
+            [activeTouches addObject:newTouch];
+        }
     }
     
     int touchesCount = [activeTouches count];
     NSLog(@"Touch Count = %i", touchesCount);
     
-    if(touchesCount == 1) {
-        firstTouchStart = [NSDate date];
-    }
-    NSDate *touchTime = [NSDate date];
-    double dt = [touchTime timeIntervalSinceDate:firstTouchStart];
-    
-    
-    if(touchesCount == 1 && touchMode == TOUCH_V3_NONE)
-    {
-        NSLog(@"set mode to translate");
+    if(touchesCount > 0) {
         touchMode = TOUCH_V3_MODIFY;
-        UITouch * touch = [touches anyObject];
-        touchStartPos = [touch locationInView:self];
-        touchLastPos = [touch locationInView:self];
     }
 }
 
@@ -130,44 +143,38 @@
 {
     if(touchMode == TOUCH_V3_MODIFY)
     {
-        UITouch *touch = [activeTouches objectAtIndex:0];
-        CGPoint p = [touch locationInView:self];
-        
-        float dx = (p.x-touchLastPos.x)/scale;
-        float dy = -(p.y-touchLastPos.y)/scale;
-        
-        // find points to shift
-        float rad = 100;
-        for(int i = 0; i < face.shape.num_points; ++i)
+        for (TouchState *touchState in activeTouches)
         {
-            CGPoint ps = CGPointMake(face.shape.shape[i].pos[0]*scale, self.frame.size.height-face.shape.shape[i].pos[1]*scale);
+            CGPoint p = [touchState.touch locationInView:self];
             
-            float dist2 = ((ps.x - p.x) * (ps.x - p.x) + (ps.y - p.y) * (ps.y - p.y));
-            float dist = sqrt(dist2);
+            float dx = (p.x-touchState.touchLastPos.x)/scale;
+            float dy = (p.y-touchState.touchLastPos.y)/scale;
             
-            
-            // move points
-            float intensity = 0;
-            if(dist < rad)
+            // find points to shift
+            float rad = 100;
+            for(int i = 0; i < faceShape.num_points; ++i)
             {
-                intensity = (rad-dist)/rad;
-                intensity = (intensity < 0 ? 0 : intensity);
-                intensity = (intensity > 1 ? 1 : intensity);
-                face.shape.shape[i].pos[0] += dx*intensity;
-                face.shape.shape[i].pos[1] += dy*intensity;
+                CGPoint ps = CGPointMake(faceShape.shape[i].pos[0]*scale, faceShape.shape[i].pos[1]*scale);
+                
+                float dist2 = ((ps.x - p.x) * (ps.x - p.x) + (ps.y - p.y) * (ps.y - p.y));
+                float dist = sqrt(dist2);
+                
+                
+                // move points
+                float intensity = 0;
+                if(dist < rad)
+                {
+                    intensity = (rad-dist)/rad;
+                    intensity = (intensity < 0 ? 0 : intensity);
+                    intensity = (intensity > 1 ? 1 : intensity);
+                    faceShape.shape[i].pos[0] += dx*intensity;
+                    faceShape.shape[i].pos[1] += dy*intensity;
+                }
             }
+            touchState.touchLastPos = p;
         }
-        
-        // apply model
-        param = [model findBestMatchingParams:face.shape];
-        param = [model applyConstraintsToParams:param];
-        PDMShape *tmpS = [model createNewShapeWithAllParams:param];
-        face.shape = tmpS;
-        
-        touchLastPos = p;
+        [delegate shapeModified:faceShape];
     }
-    
-    [self setNeedsDisplay];
     
 }
 
@@ -176,18 +183,18 @@
  */
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    // remove the touch from the list of active touches
+    // remove the touch that ended
     NSArray *touchesArray = [touches allObjects];
-    for(NSInteger j = 0; j < [touchesArray count]; ++j) {
-        NSUInteger ind = [activeTouches indexOfObject:[touchesArray objectAtIndex:j]];
+    for (UITouch *uiTouch in touchesArray) {
         
-        if(ind == 0 && touchMode == TOUCH_V3_MODIFY)
-            touchMode = TOUCH_V3_NONE;
-        
-        if(ind != NSNotFound)
-            [activeTouches removeObjectAtIndex:ind];
+        for (TouchState *touchState in activeTouches) {
+            if(touchState.touch == uiTouch) {
+                [activeTouches removeObject:touchState];
+                break;
+            }
+        }
     }
-    [tmpShape setNewShapeData:face.shape];
+    
     [self setNeedsDisplay];
 }
 

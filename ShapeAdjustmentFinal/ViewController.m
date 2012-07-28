@@ -14,14 +14,21 @@
 
 @implementation ViewController
 
-@synthesize mainController = _mainController;
-@synthesize faceView = _faceView;
+@synthesize mainController;
+@synthesize faceView;
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     NSLog(@"viewDidLoad...mainController = %@", mainController);
-	// Do any additional setup after loading the view, typically from a nib.
+
+    if(mainController)
+    {
+        [faceView setFaceImage:mainController.faceImage];
+        [faceView setFaceShapeParams:mainController.shapeModel.meanShape :mainController.shapeParams.T];
+        faceView.delegate = self;
+    }
+    
 }
 
 - (void)viewDidUnload
@@ -33,6 +40,11 @@
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
+}
+
+- (void)updateShapeParameter:(ViewFace *)controller newParams:(PDMTMat *)tmat
+{
+    [mainController updateT:tmat];
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
@@ -49,9 +61,12 @@
 	[picker dismissModalViewControllerAnimated:YES];
     
     UIImage *image = [info objectForKey:@"UIImagePickerControllerOriginalImage"];
-    [_mainController newFaceWithImage:image];
-    [_faceView setNewFace:_mainController.face];
-    [_faceView setNeedsDisplay];
+    [mainController newFaceWithImage:image];
+    
+    [faceView setFaceImage:image];
+    [faceView setFaceShapeParams:mainController.shapeModel.meanShape :mainController.shapeParams.T];
+    
+    [faceView setNeedsDisplay];
 }
 
 

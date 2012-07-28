@@ -27,8 +27,8 @@
     
     if(mainController)
     {
-        [faceView setNewFace:mainController.face];
-        tmpShape = mainController.face.shape;
+        [faceView setFaceImage:mainController.faceImage];
+        [faceView updateShape:mainController.faceShape];
         
         // set param vector
         b = mainController.shapeParams.b;
@@ -83,11 +83,9 @@
 
 - (void)updateModel
 {
-    NSLog(@"UPDATE MODEL");
-    PDMShape *newShape = [mainController.shapeModel createNewShapeWithParams:b];
-    [newShape alignShapeTo:tmpShape];
-    mainController.face.shape = newShape;
-    [faceView updateShape:newShape];
+    //NSLog(@"UPDATE MODEL");
+    [mainController updateb:b];
+    [faceView updateShape:mainController.faceShape];
 }
 
 @end

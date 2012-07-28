@@ -29,21 +29,18 @@
 }
 
 
-- (void)setNewFace:(Face*)f
+- (void)setFaceImage:(UIImage*)img
 {
-    NSLog(@"ViewFace2:setNewFace");
-    face = f;
-    
     CGSize viewSize = self.frame.size;
     
-    float s1 = face.image.size.width/viewSize.width;
-    float s2 = face.image.size.height/viewSize.height;
+    float s1 = img.size.width/viewSize.width;
+    float s2 = img.size.height/viewSize.height;
     scale = 1/MAX(s1,s2);
     
-    CGSize imgSize = CGSizeMake(scale*face.image.size.width, scale*face.image.size.height);
+    CGSize imgSize = CGSizeMake(scale*img.size.width, scale*img.size.height);
     
     UIGraphicsBeginImageContext(imgSize);
-    [face.image drawInRect:CGRectMake(0, 0, imgSize.width, imgSize.height)];
+    [img drawInRect:CGRectMake(0, 0, imgSize.width, imgSize.height)];
     tmpImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
 }
@@ -51,7 +48,7 @@
 
 - (void)updateShape:(PDMShape*)s
 {
-    face.shape = s;
+    tmpShape = s;
     [self setNeedsDisplay];
 }
 
@@ -72,16 +69,19 @@
     CGRect imgRect = CGRectMake(0, 0, tmpImage.size.width, tmpImage.size.height);
     [tmpImage drawInRect:imgRect];
     
-    if(face.shape)
+    if(tmpShape)
     {
         CGContextSetLineWidth(context, 3.0f);
         CGContextSetStrokeColorWithColor(context, [UIColor greenColor].CGColor);
         CGContextSetFillColorWithColor(context, [UIColor greenColor].CGColor);
-        for(int i = 0; i < face.shape.num_points; ++i)
+        for(int i = 0; i < tmpShape.num_points; ++i)
         {
-            CGPoint p = CGPointMake(face.shape.shape[i].pos[0]*scale, face.shape.shape[i].pos[1]*scale);
-            CGContextFillEllipseInRect(context, CGRectMake(p.x, self.frame.size.height-p.y, 5, 5));
-            //NSLog(@"x = %f, y = %f", p.x, p.y);
+            CGRect rect = CGRectMake(
+                                     tmpShape.shape[i].pos[0]*scale,
+                                     tmpShape.shape[i].pos[1]*scale,
+                                     5, 5
+                                     );
+            CGContextFillEllipseInRect(context, rect);
         }
     }
 }

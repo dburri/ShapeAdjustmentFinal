@@ -66,10 +66,10 @@
     shape = malloc(s.num_points*sizeof(point_t));
     
     num_points = s.num_points;
-    for(int i = 0; i < num_points; ++i) {
-        for(int j = 0; j < 3; ++j) {
-            shape[i].pos[j] = s.shape[i].pos[j];
-        }
+    float *ptr_src = &(s.shape[0].pos[0]);
+    float *ptr_dst = &(shape[0].pos[0]);
+    for(int i = 0; i < num_points*3; ++i) {
+        *ptr_dst++ = *ptr_src++;
     }
 }
 

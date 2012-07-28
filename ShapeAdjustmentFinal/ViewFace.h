@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "Face.h"
+#import "PDMTMat.h"
+#import "PDMShape.h"
 
 
 typedef enum 
@@ -17,10 +18,21 @@ typedef enum
     TOUCH_SCALE_SHAPE
 } TouchMode;
 
+@class ViewFace;
+
+@protocol ViewNewParamsDelegate
+- (void)updateShapeParameter:(ViewFace *)controller newParams:(PDMTMat *)tmat;
+@end
+
 @interface ViewFace : UIView {
-    Face *face;
+    UIImage *origImage;
     UIImage *tmpImage;
+    
+    PDMShape *origShape;
     PDMShape *tmpShape;
+    
+    PDMTMat *origTMat;
+    PDMTMat *tmpTMat;
     
     TouchMode touchMode;
     CGPoint touchStartPos;
@@ -33,6 +45,10 @@ typedef enum
     NSDate *firstTouchStart;
 }
 
-- (void)setNewFace:(Face*)f;
+@property (nonatomic, weak) id <ViewNewParamsDelegate> delegate;
+
+
+- (void)setFaceImage:(UIImage*)img;
+- (void)setFaceShapeParams:(PDMShape*)shape :(PDMTMat*)TMat;
 
 @end
