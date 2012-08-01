@@ -21,7 +21,7 @@
 {
     [super viewDidLoad];
     NSLog(@"viewDidLoad...mainController = %@", mainController);
-
+    
     if(mainController)
     {
         [faceView setFaceImage:mainController.faceImage];
@@ -75,7 +75,7 @@
     
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
 	picker.delegate = self;
-    picker.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
+    picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
 	[self presentModalViewController:picker animated:YES];
     
 }
@@ -89,5 +89,6 @@
 	[self presentModalViewController:picker animated:YES];
     
 }
+
 
 @end

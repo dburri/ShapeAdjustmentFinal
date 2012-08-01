@@ -61,26 +61,40 @@
     
     CGContextRef context = UIGraphicsGetCurrentContext();
     
-    CGContextSetLineWidth(context, 3.0f);
-    CGContextSetStrokeColorWithColor(context, [UIColor blueColor].CGColor);
-    CGContextAddRect(context,CGRectMake(80, 80, 120, 120));
-    CGContextStrokePath(context);
-    
     CGRect imgRect = CGRectMake(0, 0, tmpImage.size.width, tmpImage.size.height);
     [tmpImage drawInRect:imgRect];
     
+    
     if(tmpShape)
     {
-        CGContextSetLineWidth(context, 3.0f);
-        CGContextSetStrokeColorWithColor(context, [UIColor greenColor].CGColor);
-        CGContextSetFillColorWithColor(context, [UIColor greenColor].CGColor);
+        const point_info_t *pointInfo = [tmpShape.pointsInfo getPointInfo];
         for(int i = 0; i < tmpShape.num_points; ++i)
         {
-            CGRect rect = CGRectMake(
-                                     tmpShape.shape[i].pos[0]*scale,
-                                     tmpShape.shape[i].pos[1]*scale,
-                                     5, 5
-                                     );
+            if(pointInfo[i].isVisible == 0)
+                continue;
+            
+            // draw connection
+            CGContextSetLineWidth(context, 1.5f);
+            CGContextSetStrokeColorWithColor(context, [UIColor whiteColor].CGColor);
+            CGContextSetFillColorWithColor(context, [UIColor whiteColor].CGColor);
+            
+            int cFrom = pointInfo[i].pointNr;
+            int cTo = pointInfo[i].connectionTo;
+            
+            CGPoint p1 = CGPointMake(tmpShape.shape[cFrom].pos[0]*scale, tmpShape.shape[cFrom].pos[1]*scale);
+            CGPoint p2 = CGPointMake(tmpShape.shape[cTo].pos[0]*scale, tmpShape.shape[cTo].pos[1]*scale);
+            
+            CGContextMoveToPoint(context, p1.x, p1.y);
+            CGContextAddLineToPoint(context, p2.x, p2.y);
+            CGContextClosePath(context);
+            CGContextDrawPath(context, kCGPathStroke);
+            
+            
+            // draw point
+            CGContextSetLineWidth(context, 3.0f);
+            CGContextSetStrokeColorWithColor(context, [UIColor greenColor].CGColor);
+            CGContextSetFillColorWithColor(context, [UIColor greenColor].CGColor);
+            CGRect rect = CGRectMake(p1.x-2, p1.y-2, 4, 4);
             CGContextFillEllipseInRect(context, rect);
         }
     }

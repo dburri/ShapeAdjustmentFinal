@@ -26,13 +26,13 @@
 @synthesize param;
 
 
-
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
         NSLog(@"ViewFace:initWithFrame");
         activeTouches = [[NSMutableArray alloc] init];
+        radius = 60;
     }
     return self;
 }
@@ -43,6 +43,7 @@
     if (self) {
         NSLog(@"ViewFace:initWithCoder");
         activeTouches = [[NSMutableArray alloc] init];
+        radius = 60;
     }
     return self;
 }
@@ -68,8 +69,14 @@
 
 - (void)setShape:(PDMShape*)s
 {
-    faceShape = s;
+    tmpShape = s;
     [self setNeedsDisplay];
+}
+
+
+- (void)setTouchRadius:(float)rad
+{
+    radius = rad;
 }
 
 
@@ -84,17 +91,39 @@
     CGRect imgRect = CGRectMake(0, 0, tmpImage.size.width, tmpImage.size.height);
     [tmpImage drawInRect:imgRect];
     
-    if(faceShape)
+    if(tmpShape)
     {
-        CGContextSetLineWidth(context, 3.0f);
-        CGContextSetStrokeColorWithColor(context, [UIColor greenColor].CGColor);
-        CGContextSetFillColorWithColor(context, [UIColor greenColor].CGColor);
-        for(int i = 0; i < faceShape.num_points; ++i)
+        const point_info_t *pointInfo = [tmpShape.pointsInfo getPointInfo];
+        for(int i = 0; i < tmpShape.num_points; ++i)
         {
+            if(pointInfo[i].isVisible == 0)
+                continue;
+            
+            // draw connection
+            CGContextSetLineWidth(context, 1.5f);
+            CGContextSetStrokeColorWithColor(context, [UIColor whiteColor].CGColor);
+            CGContextSetFillColorWithColor(context, [UIColor whiteColor].CGColor);
+            
+            int cFrom = pointInfo[i].pointNr;
+            int cTo = pointInfo[i].connectionTo;
+            
+            CGPoint p1 = CGPointMake(tmpShape.shape[cFrom].pos[0]*scale, tmpShape.shape[cFrom].pos[1]*scale);
+            CGPoint p2 = CGPointMake(tmpShape.shape[cTo].pos[0]*scale, tmpShape.shape[cTo].pos[1]*scale);
+            
+            CGContextMoveToPoint(context, p1.x, p1.y);
+            CGContextAddLineToPoint(context, p2.x, p2.y);
+            CGContextClosePath(context);
+            CGContextDrawPath(context, kCGPathStroke);
+            
+            
+            // draw point
+            CGContextSetLineWidth(context, 3.0f);
+            CGContextSetStrokeColorWithColor(context, [UIColor greenColor].CGColor);
+            CGContextSetFillColorWithColor(context, [UIColor greenColor].CGColor);
             CGRect rect = CGRectMake(
-                                     faceShape.shape[i].pos[0]*scale,
-                                     faceShape.shape[i].pos[1]*scale,
-                                     5, 5
+                                     tmpShape.shape[i].pos[0]*scale-2,
+                                     tmpShape.shape[i].pos[1]*scale-2,
+                                     4, 4
                                      );
             CGContextFillEllipseInRect(context, rect);
         }
@@ -103,7 +132,12 @@
     CGContextSetRGBFillColor(context, 0.0, 1.0, 0.0, 0.5);
     for (TouchState *touchState in activeTouches) {
         CGPoint p = [touchState.touch locationInView:self];
-        CGContextFillEllipseInRect(context, CGRectMake(p.x-50, p.y-50, 100, 100));
+        CGContextFillEllipseInRect(context, CGRectMake(p.x-radius, p.y-radius, 2*radius, 2*radius));
+    }
+    CGContextSetRGBFillColor(context, 0.0, 1.0, 0.0, 0.5);
+    for (TouchState *touchState in activeTouches) {
+        CGPoint p = [touchState.touch locationInView:self];
+        CGContextFillEllipseInRect(context, CGRectMake(p.x-radius/2, p.y-radius/2, radius, radius));
     }
 }
 
@@ -151,10 +185,9 @@
             float dy = (p.y-touchState.touchLastPos.y)/scale;
             
             // find points to shift
-            float rad = 100;
-            for(int i = 0; i < faceShape.num_points; ++i)
+            for(int i = 0; i < tmpShape.num_points; ++i)
             {
-                CGPoint ps = CGPointMake(faceShape.shape[i].pos[0]*scale, faceShape.shape[i].pos[1]*scale);
+                CGPoint ps = CGPointMake(tmpShape.shape[i].pos[0]*scale, tmpShape.shape[i].pos[1]*scale);
                 
                 float dist2 = ((ps.x - p.x) * (ps.x - p.x) + (ps.y - p.y) * (ps.y - p.y));
                 float dist = sqrt(dist2);
@@ -162,18 +195,18 @@
                 
                 // move points
                 float intensity = 0;
-                if(dist < rad)
+                if(dist < radius)
                 {
-                    intensity = (rad-dist)/rad;
+                    intensity = (radius-dist)/radius;
                     intensity = (intensity < 0 ? 0 : intensity);
                     intensity = (intensity > 1 ? 1 : intensity);
-                    faceShape.shape[i].pos[0] += dx*intensity;
-                    faceShape.shape[i].pos[1] += dy*intensity;
+                    tmpShape.shape[i].pos[0] += dx*intensity;
+                    tmpShape.shape[i].pos[1] += dy*intensity;
                 }
             }
             touchState.touchLastPos = p;
         }
-        [delegate shapeModified:faceShape];
+        [delegate shapeModified:tmpShape];
     }
     
 }

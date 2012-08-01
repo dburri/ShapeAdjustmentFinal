@@ -16,8 +16,6 @@ typedef enum
 } TouchModeView3;
 
 
-
-
 @class ViewFace3;
 
 @protocol View3NewShapeParametersDelegate
@@ -40,22 +38,22 @@ typedef enum
 @interface ViewFace3 : UIView
 {
     UIImage *tmpImage;
-    PDMShape *faceShape;
+    PDMShape *tmpShape;
     
     float scale;
-    
     TouchModeView3 touchMode;
-    
     NSMutableArray *activeTouches;
+    
+    float radius;
 }
 
 @property (nonatomic, weak) id <View3NewShapeParametersDelegate> delegate;
-
 @property (retain) PDMShapeModel *model;
 @property (retain) PDMShapeParameter *param;
 
 - (void)setFaceImage:(UIImage*)img;
 - (void)setShape:(PDMShape*)s;
+- (void)setTouchRadius:(float)rad;
 
 
 

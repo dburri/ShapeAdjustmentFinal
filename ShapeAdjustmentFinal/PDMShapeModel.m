@@ -246,6 +246,7 @@
     meanShape= nil;
     meanShape = [[PDMShape alloc] init];
     [meanShape loadShape:fXM];
+    [meanShape loadPointInfo:@"xm2vts_model_connections"];
 
     // load eigenvectors and eigenvalues
     [self loadEigVectors:fV];

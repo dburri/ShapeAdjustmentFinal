@@ -22,18 +22,28 @@
     IBOutlet ViewFace3 *faceView;
     IBOutlet UISegmentedControl *segControl;
     IBOutlet UISlider *slider;
+    IBOutlet UISlider *sliderSize;
     IBOutlet UILabel *textField;
+    IBOutlet UILabel *textFieldSize;
+    IBOutlet UIView *settingsView;
 }
 
 @property (retain) ControlMain *mainController;
 @property (retain) IBOutlet ViewFace3 *faceView;
 @property (retain) IBOutlet UISegmentedControl *segControl;
 @property (retain) IBOutlet UISlider *slider;
+@property (retain) IBOutlet UISlider *sliderSize;
 @property (retain) IBOutlet UILabel *textField;
+@property (retain) IBOutlet UILabel *textFieldSize;
+@property (retain) IBOutlet UIView *settingsView;
 
 - (IBAction)changeBoundMode:(id)sender;
 - (IBAction)changeBoundValue:(id)sender;
+- (IBAction)changeTouchSize:(id)sender;
 - (IBAction)resetParams:(id)sender;
+
+- (IBAction)showSettings:(id)sender;
+- (IBAction)dismissSettings:(id)sender;
 
 
 @end

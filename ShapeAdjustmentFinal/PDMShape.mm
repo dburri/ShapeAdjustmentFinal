@@ -6,36 +6,94 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "PDMShape.h"
-
 #undef DEBUG
+
+#import "PDMShape.h"
+#include <vector>
+
+using namespace std;
+
+// ******************************************************
+// PDMPOINTINFO IMPLEMENTATION
+// ******************************************************
+
+@interface PDMPointsInfo() {
+    vector<point_info_t> pointInfo;
+}
+@end
+
+@implementation PDMPointsInfo
+
+- (id)init:(size_t)numP {
+    self = [super init];
+    if (self) {
+        
+    }
+    return self;
+}
+
+- (const point_info_t*)getPointInfo
+{
+    return &pointInfo[0];
+}
+
+
+- (void)loadPointsInfo:(NSString*)file
+{
+    NSLog(@"LOAD POINT INFORMARION....");
+    
+    NSError* err;
+    NSString *path = [[NSBundle mainBundle] pathForResource:file ofType:@"csv"];
+    NSString *dataStr = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&err];
+    
+    if(dataStr == nil) {
+        NSLog(@"Error reading file at %@\n%@", path, [err localizedFailureReason]);
+    }
+    NSArray *dataArray = [dataStr componentsSeparatedByString:@"\n"];
+    
+    size_t length = [dataArray count]-2;
+    pointInfo.assign(length, point_info_t());
+    
+    for (int i = 0; i < length; ++i)
+    {
+        NSArray *colArray = [[dataArray objectAtIndex:i+1] componentsSeparatedByString:@","];
+        
+        pointInfo[i].component = [[colArray objectAtIndex:0] intValue];
+        pointInfo[i].isVisible = [[colArray objectAtIndex:1] intValue];
+        pointInfo[i].pointNr = [[colArray objectAtIndex:2] intValue];
+        pointInfo[i].isConnected = [[colArray objectAtIndex:3] intValue];
+        pointInfo[i].connectionTo = [[colArray objectAtIndex:4] intValue];
+    }
+}
+
+@end
+
+
+
+// ******************************************************
+// PDMSHAPE IMPLEMENTATION
+// ******************************************************
 
 @implementation PDMShape
 
 @synthesize shape;
 @synthesize num_points;
+@synthesize pointsInfo;
 
 - (id)init {
     self = [super init];
     if (self) {
+        num_points = 0;
         shape = NULL;
-        
-        #ifdef DEBUG
-        NSLog(@"PDMShape:init");
-        #endif
+        pointsInfo = [[PDMPointsInfo alloc] init];
     }
     return self;
 }
 
 - (id)initWithData:(PDMShape*)s
 {
-    self = [super init];
+    self = [self init];
     if (self) {
-        #ifdef DEBUG
-        NSLog(@"PDMShape:initWithData");
-        #endif
-        
-        shape = NULL;
         [self setNewShapeData:s];
     }
     return self;
@@ -57,13 +115,12 @@
 
 - (void)setNewShapeData:(PDMShape *)s
 {
-    //NSLog(@"PDMShape:setNewShapeData");
-    
+
+    // deep copy of the shape data
     if(shape) {
         free(shape);
     }
-    
-    shape = malloc(s.num_points*sizeof(point_t));
+    shape = (point_t*)malloc(s.num_points*sizeof(point_t));
     
     num_points = s.num_points;
     float *ptr_src = &(s.shape[0].pos[0]);
@@ -71,6 +128,9 @@
     for(int i = 0; i < num_points*3; ++i) {
         *ptr_dst++ = *ptr_src++;
     }
+    
+    // copy reference to its info
+    pointsInfo = s.pointsInfo;
 }
 
 
@@ -86,36 +146,6 @@
     num_points = nPoints;
 }
 
-- (void)loadShape:(NSString*)file
-{
-    
-    #ifdef DEBUG
-    NSLog(@"PDMShape:loadShape");
-    #endif
-    
-    NSError* err;
-    NSString *path = [[NSBundle mainBundle] pathForResource:file ofType:@"csv"];
-    NSString *dataStr = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&err];
-    
-    if(dataStr == nil) {
-        NSLog(@"Error reading file at %@\n%@", path, [err localizedFailureReason]);
-    }
-    NSArray *dataArray = [dataStr componentsSeparatedByString:@"\n"];
-    
-    num_points = ([dataArray count]-1)/2;
-    size_t num_bytes = num_points*sizeof(point_t);      // store as homogeneous
-    if(shape) {
-        free(shape);
-    }
-    shape = malloc(num_bytes);
-    float *shape_ptr = &(shape[0].pos[0]);
-    for(int i = 0; i < num_points; ++i)
-    {
-        *shape_ptr++ = [[dataArray objectAtIndex:i] doubleValue];
-        *shape_ptr++ = -[[dataArray objectAtIndex:i+num_points] doubleValue];
-        *shape_ptr++ = 1.0;
-    }
-}
 
 
 // -----------------------------------------------
@@ -231,7 +261,7 @@
     int ldb = 3;
     
     float s = 1.0;
-    float *tmpShape = malloc(num_points*sizeof(point_t));
+    float *tmpShape = (float*)malloc(num_points*sizeof(point_t));
     memset(tmpShape, 0, num_points*sizeof(point_t));
     
     cblas_sgemm(CblasRowMajor,
@@ -333,6 +363,45 @@
     }
 }
 
+
+// -----------------------------------------------
+// FILE HANDLING
+
+- (void)loadShape:(NSString*)file
+{
+    
+#ifdef DEBUG
+    NSLog(@"PDMShape:loadShape");
+#endif
+    
+    NSError* err;
+    NSString *path = [[NSBundle mainBundle] pathForResource:file ofType:@"csv"];
+    NSString *dataStr = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&err];
+    
+    if(dataStr == nil) {
+        NSLog(@"Error reading file at %@\n%@", path, [err localizedFailureReason]);
+    }
+    NSArray *dataArray = [dataStr componentsSeparatedByString:@"\n"];
+    
+    num_points = ([dataArray count]-1)/2;
+    size_t num_bytes = num_points*sizeof(point_t);      // store as homogeneous
+    if(shape) {
+        free(shape);
+    }
+    shape = (point_t*)malloc(num_bytes);
+    float *shape_ptr = &(shape[0].pos[0]);
+    for(int i = 0; i < num_points; ++i)
+    {
+        *shape_ptr++ = [[dataArray objectAtIndex:i] doubleValue];
+        *shape_ptr++ = -[[dataArray objectAtIndex:i+num_points] doubleValue];
+        *shape_ptr++ = 1.0;
+    }
+}
+
+- (void)loadPointInfo:(NSString*)file
+{
+    [pointsInfo loadPointsInfo:file];
+}
 
 - (void)printShapeValues
 {

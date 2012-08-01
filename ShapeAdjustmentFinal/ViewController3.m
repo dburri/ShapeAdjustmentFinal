@@ -17,8 +17,11 @@
 @synthesize faceView;
 @synthesize mainController;
 @synthesize slider;
+@synthesize sliderSize;
 @synthesize textField;
+@synthesize textFieldSize;
 @synthesize segControl;
+@synthesize settingsView;
 
 - (void)viewDidLoad
 {
@@ -36,7 +39,8 @@
     boundCube = 50;
     boundEllipse = 100;
     
-    textField.text = [NSString stringWithFormat:@"value = %i", (int)boundCube];
+    textField.text = [NSString stringWithFormat:@"Param Bound = %i", (int)boundCube];
+    textFieldSize.text = [NSString stringWithFormat:@"Touch Size = %i", (int)sliderSize.value];
     slider.value = boundCube;
 }
 
@@ -61,11 +65,18 @@
 {
     if(segControl.selectedSegmentIndex == 0) {
         boundCube = slider.value;
-        textField.text = [NSString stringWithFormat:@"value = %i", (int)boundCube];
+        textField.text = [NSString stringWithFormat:@"Param Bound = %i", (int)boundCube];
     } else {
         boundEllipse = slider.value;
-        textField.text = [NSString stringWithFormat:@"value = %i", (int)boundEllipse];
+        textField.text = [NSString stringWithFormat:@"Param Bound = %i", (int)boundEllipse];
     }
+}
+
+
+- (IBAction)changeTouchSize:(id)sender
+{
+    textFieldSize.text = [NSString stringWithFormat:@"Touch Size = %i", (int)sliderSize.value];
+    [faceView setTouchRadius:sliderSize.value];
 }
 
 - (IBAction)resetParams:(id)sender
@@ -99,14 +110,73 @@
     
     
     if(segControl.selectedSegmentIndex == 0) {
-        tmpParam = [mainController.shapeModel applyConstraintsToParamsCube:tmpParam :slider.value];
+        tmpParam = [mainController.shapeModel applyConstraintsToParamsCube:tmpParam :boundCube];
     } else {
-        tmpParam = [mainController.shapeModel applyConstraintsToParamsEllipse:tmpParam :slider.value];
+        tmpParam = [mainController.shapeModel applyConstraintsToParamsEllipse:tmpParam :boundEllipse];
     }
-    
     
     [mainController update:tmpParam];
     [faceView setShape:mainController.faceShape];
+}
+
+
+- (IBAction)showSettings:(id)sender
+{
+    if(settingsView.hidden == YES)
+    {
+        settingsView.hidden = NO;
+        [UIView animateWithDuration:0.2
+                              delay:0.0
+                            options:UIViewAnimationOptionCurveEaseOut
+                         animations:^ {
+                             settingsView.alpha = 1.0;
+                             settingsView.transform = CGAffineTransformMakeTranslation(0, -settingsView.frame.size.height);
+                         }
+                         completion:^(BOOL finished) {
+                             settingsView.hidden = NO;
+                         }];
+        
+        
+        [UIView animateWithDuration:0.2
+                              delay:0.0
+                            options:UIViewAnimationOptionCurveEaseOut
+                         animations:^ {
+                             faceView.alpha = 0.5;
+                         }
+                         completion:^(BOOL finished) {
+                             faceView.userInteractionEnabled = NO;
+                         }];
+    }
+    
+}
+
+- (IBAction)dismissSettings:(id)sender
+{
+    if(settingsView.hidden == NO)
+    {
+        [UIView animateWithDuration:0.2
+                              delay:0.0
+                            options:UIViewAnimationOptionCurveEaseIn
+                         animations:^ {
+                             settingsView.alpha = 1.0;
+                             settingsView.transform = CGAffineTransformMakeTranslation(0, 0);
+                         }
+                         completion:^(BOOL finished) {
+                             settingsView.hidden = YES;
+                         }];
+        
+        
+        [UIView animateWithDuration:0.2
+                              delay:0.0
+                            options:UIViewAnimationOptionCurveEaseOut
+                         animations:^ {
+                             faceView.alpha = 1.0;
+                         }
+                         completion:^(BOOL finished) {
+                             faceView.userInteractionEnabled = YES;
+                         }];
+    }
+    
 }
 
 @end
