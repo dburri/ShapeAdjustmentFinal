@@ -19,7 +19,7 @@
     
     // initialize main controller
     ControlMain *mainController = [[ControlMain alloc] init];
-    [mainController loadShapeModel:@"xm2vts_model_xm" :@"xm2vts_model_v" :@"xm2vts_model_d" :@"xm2vts_model_tri"];
+    [mainController loadShapeModel:@"xm2vts_m_model_xm" :@"xm2vts_m_model_v" :@"xm2vts_m_model_d" :@"xm2vts_m_model_tri"];
 
     // retrieve root view controller and pass main controller to it
     ViewController *rootViewController = (ViewController*)_window.rootViewController;

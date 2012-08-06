@@ -10,16 +10,15 @@
 
 @implementation ViewFace
 
-@synthesize delegate;
-
+@synthesize scale;
+@synthesize touchRadius;
 
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
-        NSLog(@"ViewFace:initWithFrame");
         activeTouches = [[NSMutableArray alloc] init];
-        tmpShape = [PDMShape alloc];
+        scale = 1;
     }
     return self;
 }
@@ -28,9 +27,8 @@
 {
     self = [super initWithCoder:decoder];
     if (self) {
-        NSLog(@"ViewFace:initWithCoder");
         activeTouches = [[NSMutableArray alloc] init];
-        tmpShape = [PDMShape alloc];
+        scale = 1;
     }
     return self;
 }
@@ -42,7 +40,7 @@
 }
 
 
-- (void)setFaceImage:(UIImage*)img
+- (void)setImage:(UIImage*)img
 {
     
     CGSize viewSize = self.frame.size;
@@ -57,16 +55,15 @@
     [img drawInRect:CGRectMake(0, 0, imgSize.width, imgSize.height)];
     tmpImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
+    
+    [self setNeedsDisplay];
 }
 
 
-- (void)setFaceShapeParams:(PDMShape*)shape :(PDMTMat*)TMat
+- (void)setShape:(PDMShape *)shape
 {
-    origShape = shape;
-    origTMat = TMat;
-    
-    tmpShape = [origShape getCopy];
-    [tmpShape transformAffineMat:origTMat];
+    tmpShape = shape;
+    [self setNeedsDisplay];
 }
 
 
@@ -113,122 +110,34 @@
             CGContextFillEllipseInRect(context, rect);
         }
     }
-}
-
-
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
-{   
-    NSArray *touchesArray = [touches allObjects];
-    for(NSInteger j = 0; j < [touchesArray count]; ++j) {
-        if (![activeTouches containsObject:[touchesArray objectAtIndex:j]]) {
-            [activeTouches addObject:[touchesArray objectAtIndex:j]];
-        };
-    }
     
-    int touchesCount = [activeTouches count];
-    NSLog(@"Touch Count = %i", touchesCount);
-    
-    if(touchesCount == 1) {
-        firstTouchStart = [NSDate date];
-    }
-    NSDate *touchTime = [NSDate date];
-    double dt = [touchTime timeIntervalSinceDate:firstTouchStart];
-
-    
-    if(touchesCount == 1 && touchMode == TOUCH_NONE)
-    {
-        NSLog(@"set mode to translate");
-        touchMode = TOUCH_TRANSLATE_SHAPE;
-        UITouch * touch = [touches anyObject];
-        touchStartPos = [touch locationInView:self];
-    }
-    
-    if(touchesCount == 2 && dt < 0.5)
-    {
-        NSLog(@"set mode to scale");
-        touchMode = TOUCH_SCALE_SHAPE;
-        UITouch *touch1 = [activeTouches objectAtIndex:0];
-        UITouch *touch2 = [activeTouches objectAtIndex:1];
-        
-        CGPoint p1 = [touch1 locationInView:self];
-        CGPoint p2 = [touch2 locationInView:self];
-        
-        touchStartPos = CGPointMake((p1.x+p2.x)/2, (p1.y+p2.y)/2);
-        touchStartDistance = sqrtf( powf(p1.x-p2.x,2) + powf(p1.y-p2.y,2));
-        touchStartAngle = atan2f(p1.x-p2.x, p1.y-p2.y);
-    }
-    
-    tmpTMat = [[PDMTMat alloc] initWithMat:origTMat];
-}
-
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
-{
-    if(touchMode == TOUCH_TRANSLATE_SHAPE)
-    {
-        NSLog(@"Translate shape!!!");
-        UITouch *touch = [activeTouches objectAtIndex:0];
+    CGContextSetRGBFillColor(context, 0.0, 1.0, 0.0, 0.5);
+    for (UITouch *touch in activeTouches) {
         CGPoint p = [touch locationInView:self];
-        
-        float dx = (p.x-touchStartPos.x)/scale;
-        float dy = (p.y-touchStartPos.y)/scale;
-        
-        PDMTMat *matT = [[PDMTMat alloc] initWithTranslate:dx :dy];
-        tmpTMat = [origTMat multiply:matT];
+        NSLog(@"point in view = [%f, %f], radius = %f", p.x, p.y, touchRadius);
+        CGContextFillEllipseInRect(context, CGRectMake(p.x-touchRadius, p.y-touchRadius, 2*touchRadius, 2*touchRadius));
     }
-    
-    else if(touchMode == TOUCH_SCALE_SHAPE)
-    {
-        NSLog(@"Scale shape!!!");
-    
-        UITouch *touch1 = [activeTouches objectAtIndex:0];
-        UITouch *touch2 = [activeTouches objectAtIndex:1];
-        
-        CGPoint p1 = [touch1 locationInView:self];
-        CGPoint p2 = [touch2 locationInView:self];
-        CGPoint p = CGPointMake((p1.x+p2.x)/2, (p1.y+p2.y)/2);
-        
-        float dx = (p.x-touchStartPos.x)/scale;
-        float dy = (p.y-touchStartPos.y)/scale;
-        
-        float touchDistance = sqrtf( powf(p1.x-p2.x,2) + powf(p1.y-p2.y,2));
-        float s = touchDistance/touchStartDistance;
-        float touchAngle = atan2f(p1.x-p2.x, p1.y-p2.y);
-        float a = touchStartAngle - touchAngle;
-        //NSLog(@"Angle = %f", a);
-        
-        PDMTMat *matSRT = [[PDMTMat alloc] initWithSRT:s :a :dx :dy];
-        tmpTMat = [origTMat multiplyPreservingTranslation:matSRT];
+    CGContextSetRGBFillColor(context, 0.0, 1.0, 0.0, 0.5);
+    for (UITouch *touch in activeTouches) {
+        CGPoint p = [touch locationInView:self];
+        CGContextFillEllipseInRect(context, CGRectMake(p.x-touchRadius/2, p.y-touchRadius/2, touchRadius, touchRadius));
     }
-    
-    [tmpShape setNewShapeData:origShape];
-    [tmpShape transformAffineMat:tmpTMat];
-    
-    [self setNeedsDisplay];
     
 }
 
-/**
- Called when a touch ends
- */
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+
+- (void)addTouch:(UITouch*)touch
 {
-    // remove the touch from the list of active touches
-    NSArray *touchesArray = [touches allObjects];
-    for(NSInteger j = 0; j < [touchesArray count]; ++j) {
-        NSUInteger ind = [activeTouches indexOfObject:[touchesArray objectAtIndex:j]];
-        
-        if(ind == 0 && touchMode == TOUCH_TRANSLATE_SHAPE)
-            touchMode = TOUCH_NONE;
-        
-        if((ind == 0 || ind == 1) && touchMode == TOUCH_SCALE_SHAPE)
-            touchMode = TOUCH_NONE;
-
-        if(ind != NSNotFound)
-            [activeTouches removeObjectAtIndex:ind];
-    }
-    
-    origTMat = tmpTMat;
-    [delegate updateShapeParameter:self newParams:origTMat];
+    NSLog(@"addig touch");
+    [activeTouches addObject:touch];
 }
+
+- (void)removeTouch:(UITouch*)touch
+{
+    NSLog(@"removeing touch");
+    [activeTouches removeObject:touch];
+}
+
+
 
 @end

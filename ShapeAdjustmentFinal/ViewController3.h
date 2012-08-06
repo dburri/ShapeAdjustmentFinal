@@ -8,18 +8,29 @@
 
 #import <UIKit/UIKit.h>
 #import "ControlMain.h"
-#import "ViewFace3.h"
+#import "ViewFace.h"
 #import "ViewController2.h"
 
-@interface ViewController3 : UIViewController <View3NewShapeParametersDelegate>
+typedef enum 
+{
+    TOUCH_V3_NONE,
+    TOUCH_V3_MODIFY
+} TouchModeView3;
+
+
+@interface ViewController3 : UIViewController
 {
     ControlMain *mainController;
-    PDMShape *tmpShape;
+    
+    TouchModeView3 touchMode;
+    NSMutableArray *activeTouches;
+    
+    float radius;
     
     float boundCube;
     float boundEllipse;
     
-    IBOutlet ViewFace3 *faceView;
+    IBOutlet ViewFace *faceView;
     IBOutlet UISegmentedControl *segControl;
     IBOutlet UISlider *slider;
     IBOutlet UISlider *sliderSize;
@@ -29,7 +40,7 @@
 }
 
 @property (retain) ControlMain *mainController;
-@property (retain) IBOutlet ViewFace3 *faceView;
+@property (retain) IBOutlet ViewFace *faceView;
 @property (retain) IBOutlet UISegmentedControl *segControl;
 @property (retain) IBOutlet UISlider *slider;
 @property (retain) IBOutlet UISlider *sliderSize;

@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "ControlMain.h"
-#import "ViewFace2.h"
+#import "ViewFace.h"
 #import "ViewController.h"
 #import "ViewController3.h"
 
@@ -20,13 +20,13 @@
     NSMutableArray *b;
     PDMShape *tmpShape;
     
-    IBOutlet ViewFace2 *faceView;
+    IBOutlet ViewFace *faceView;
     IBOutlet UISlider *slider;
     IBOutlet UISegmentedControl *segControl;
 }
 
 @property (retain) ControlMain *mainController;
-@property (retain) IBOutlet ViewFace2 *faceView;
+@property (retain) IBOutlet ViewFace *faceView;
 @property (retain) IBOutlet UISlider *slider;
 @property (retain) IBOutlet UISegmentedControl *segControl;
 

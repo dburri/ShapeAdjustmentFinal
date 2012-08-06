@@ -27,8 +27,8 @@
     
     if(mainController)
     {
-        [faceView setFaceImage:mainController.faceImage];
-        [faceView updateShape:mainController.faceShape];
+        [faceView setImage:mainController.faceImage];
+        [faceView setShape:mainController.faceShape];
         
         // set param vector
         b = mainController.shapeParams.b;
@@ -85,7 +85,7 @@
 {
     //NSLog(@"UPDATE MODEL");
     [mainController updateb:b];
-    [faceView updateShape:mainController.faceShape];
+    [faceView setShape:mainController.faceShape];
 }
 
 @end
