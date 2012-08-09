@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "ControlMain.h"
+#import "PDMModelController.h"
 
-@implementation ControlMain
+@implementation PDMModelController
 
 @synthesize shapeModel;
 @synthesize shapeParams;

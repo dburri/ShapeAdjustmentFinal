@@ -36,7 +36,7 @@
                                     <action selector="loadImageLibrary:" destination="2" eventType="touchUpInside" id="IOr-bF-0UR"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="KM7-hr-UbV">
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="KM7-hr-UbV">
                                 <rect key="frame" x="175" y="403" width="120" height="37"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="boldSystem" size="button"/>
@@ -55,6 +55,7 @@
                         <color key="backgroundColor" cocoaTouchSystemColor="darkTextColor"/>
                     </view>
                     <connections>
+                        <outlet property="buttonContinue" destination="KM7-hr-UbV" id="dBW-ST-6WA"/>
                         <outlet property="faceView" destination="0XL-Nt-j33" id="8ct-Zp-bWG"/>
                     </connections>
                 </viewController>
@@ -90,7 +91,7 @@
                                     <action selector="modeSelectorChanged:" destination="g4J-Ia-CSI" eventType="valueChanged" id="i9d-1B-Gm1"/>
                                 </connections>
                             </segmentedControl>
-                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="-1" maxValue="1" id="kPP-cH-rBI">
+                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="-0.5" maxValue="0.5" id="kPP-cH-rBI">
                                 <rect key="frame" x="18" y="367" width="284" height="23"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <connections>
@@ -154,7 +155,7 @@
                                 <color key="backgroundColor" cocoaTouchSystemColor="darkTextColor"/>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="o0m-HO-ZeQ">
-                                <rect key="frame" x="206" y="403" width="100" height="37"/>
+                                <rect key="frame" x="110" y="403" width="100" height="37"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
                                 <state key="normal" title="Settings">
@@ -169,10 +170,10 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="9MK-VZ-F0a">
-                                <rect key="frame" x="20" y="403" width="100" height="37"/>
+                                <rect key="frame" x="20" y="403" width="82" height="37"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                <state key="normal" title="&lt;--">
+                                <state key="normal" title="Back">
                                     <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -181,6 +182,21 @@
                                 </state>
                                 <connections>
                                     <segue destination="g4J-Ia-CSI" kind="modal" identifier="View3ToView2" modalTransitionStyle="crossDissolve" id="ZHS-Vf-plR"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="1PF-ml-GCT">
+                                <rect key="frame" x="218" y="403" width="82" height="37"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                <state key="normal" title="OK">
+                                    <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <state key="highlighted">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <segue destination="yNd-ar-MJf" kind="modal" identifier="View3ToViewWarp" modalTransitionStyle="flipHorizontal" id="5yU-Tp-3ay"/>
                                 </connections>
                             </button>
                             <view hidden="YES" contentMode="scaleToFill" id="iDH-RZ-gno">
@@ -282,6 +298,148 @@
             </objects>
             <point key="canvasLocation" x="-342" y="1930"/>
         </scene>
+        <!--View Controller Warp-->
+        <scene sceneID="0o6-H7-zDJ">
+            <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="hB8-cx-Gyd" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <viewController id="yNd-ar-MJf" customClass="ViewControllerWarp" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="TyH-S4-rwf">
+                        <rect key="frame" x="0.0" y="20" width="320" height="460"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" id="4S6-Cm-50J">
+                                <rect key="frame" x="20" y="349" width="280" height="44"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <segments>
+                                    <segment title="1"/>
+                                    <segment title="2"/>
+                                    <segment title="3"/>
+                                    <segment title="4"/>
+                                    <segment title="5"/>
+                                    <segment title="6"/>
+                                    <segment title="7"/>
+                                    <segment title="8"/>
+                                    <segment title="9"/>
+                                </segments>
+                                <connections>
+                                    <action selector="selectorChanged:" destination="yNd-ar-MJf" eventType="valueChanged" id="1vP-4M-hj5"/>
+                                </connections>
+                            </segmentedControl>
+                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="-0.5" maxValue="0.5" id="9lc-l1-55S">
+                                <rect key="frame" x="18" y="319" width="284" height="23"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <connections>
+                                    <action selector="valueChanged:" destination="yNd-ar-MJf" eventType="valueChanged" id="7xB-co-Ysn"/>
+                                </connections>
+                            </slider>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="g2K-cb-QA9">
+                                <rect key="frame" x="20" y="403" width="100" height="37"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                <state key="normal" title="Start Over">
+                                    <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <state key="highlighted">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="startOver:" destination="yNd-ar-MJf" eventType="touchUpInside" id="Bc7-Xx-sx8"/>
+                                    <segue destination="2" kind="modal" id="aPE-0t-L6g"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="coq-rz-ZWr">
+                                <rect key="frame" x="200" y="403" width="100" height="37"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                <state key="normal" title="Settings">
+                                    <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <state key="highlighted">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="showSettings:" destination="yNd-ar-MJf" eventType="touchUpInside" id="eXF-De-swm"/>
+                                </connections>
+                            </button>
+                            <view contentMode="scaleToFill" id="22M-mp-fTQ" customClass="ViewFace">
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="311"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                            </view>
+                            <view hidden="YES" contentMode="scaleToFill" id="wk2-4P-zAW">
+                                <rect key="frame" x="0.0" y="460" width="320" height="164"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="hxC-Ra-OV9">
+                                        <rect key="frame" x="216" y="55" width="84" height="37"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                        <state key="normal" title="Reset">
+                                            <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <state key="highlighted">
+                                            <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="resetShape:" destination="yNd-ar-MJf" eventType="touchUpInside" id="Bkn-qI-BeZ"/>
+                                        </connections>
+                                    </button>
+                                    <switch opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" id="A7w-Kf-qIt">
+                                        <rect key="frame" x="221" y="20" width="79" height="27"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <connections>
+                                            <action selector="changeShowShape:" destination="yNd-ar-MJf" eventType="valueChanged" id="B8V-bm-mX7"/>
+                                        </connections>
+                                    </switch>
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Show shape" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="10" id="9ug-8R-J7L">
+                                        <rect key="frame" x="20" y="23" width="95" height="21"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Reset to mean shape" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="10" id="H57-u7-05P">
+                                        <rect key="frame" x="20" y="62" width="162" height="21"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="J4l-f9-7ya">
+                                        <rect key="frame" x="193" y="107" width="112" height="37"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                        <state key="normal" title="Dismiss">
+                                            <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <state key="highlighted">
+                                            <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="dismissSettings:" destination="yNd-ar-MJf" eventType="touchUpInside" id="cH8-1a-uh4"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" white="0.25" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                    </view>
+                    <connections>
+                        <outlet property="faceView" destination="22M-mp-fTQ" id="CFc-fd-egx"/>
+                        <outlet property="segControl" destination="4S6-Cm-50J" id="XBX-Nu-y4v"/>
+                        <outlet property="settingsView" destination="wk2-4P-zAW" id="8dL-be-C1F"/>
+                        <outlet property="slider" destination="9lc-l1-55S" id="89j-ON-rDT"/>
+                        <outlet property="switchShape" destination="A7w-Kf-qIt" id="akW-Pt-Z2q"/>
+                    </connections>
+                </viewController>
+            </objects>
+            <point key="canvasLocation" x="-342" y="2567"/>
+        </scene>
     </scenes>
     <classes>
         <class className="ViewController" superclassName="UIViewController">
@@ -289,6 +447,7 @@
             <relationships>
                 <relationship kind="action" name="loadImageCamera:"/>
                 <relationship kind="action" name="loadImageLibrary:"/>
+                <relationship kind="outlet" name="buttonContinue" candidateClass="UIButton"/>
                 <relationship kind="outlet" name="faceView" candidateClass="ViewFace"/>
             </relationships>
         </class>
@@ -320,6 +479,23 @@
                 <relationship kind="outlet" name="textFieldSize" candidateClass="UILabel"/>
             </relationships>
         </class>
+        <class className="ViewControllerWarp" superclassName="UIViewController">
+            <source key="sourceIdentifier" type="project" relativePath="./Classes/ViewControllerWarp.h"/>
+            <relationships>
+                <relationship kind="action" name="changeShowShape:"/>
+                <relationship kind="action" name="dismissSettings:"/>
+                <relationship kind="action" name="resetShape:"/>
+                <relationship kind="action" name="selectorChanged:"/>
+                <relationship kind="action" name="showSettings:"/>
+                <relationship kind="action" name="startOver:"/>
+                <relationship kind="action" name="valueChanged:"/>
+                <relationship kind="outlet" name="faceView" candidateClass="ViewFace"/>
+                <relationship kind="outlet" name="segControl" candidateClass="UISegmentedControl"/>
+                <relationship kind="outlet" name="settingsView" candidateClass="UIView"/>
+                <relationship kind="outlet" name="slider" candidateClass="UISlider"/>
+                <relationship kind="outlet" name="switchShape" candidateClass="UISwitch"/>
+            </relationships>
+        </class>
         <class className="ViewFace" superclassName="UIView">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/ViewFace.h"/>
         </class>
@@ -329,4 +505,8 @@
         <simulatedOrientationMetrics key="orientation"/>
         <simulatedScreenMetrics key="destination"/>
     </simulatedMetricsContainer>
+    <inferredMetricsTieBreakers>
+        <segue reference="Kco-pN-nmZ"/>
+        <segue reference="aPE-0t-L6g"/>
+    </inferredMetricsTieBreakers>
 </document>

@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "ViewController.h"
 
-#import "ControlMain.h"
+#import "PDMModelController.h"
 #import "PDMShape.h"
 #import "PDMShapeModel.h"
 

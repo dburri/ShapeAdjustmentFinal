@@ -7,9 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "ControlMain.h"
+#import "PDMModelController.h"
 #import "ViewFace.h"
 #import "ViewController2.h"
+#import "ViewControllerWarp.h"
 
 typedef enum 
 {
@@ -20,7 +21,7 @@ typedef enum
 
 @interface ViewController3 : UIViewController
 {
-    ControlMain *mainController;
+    PDMModelController *mainController;
     
     TouchModeView3 touchMode;
     NSMutableArray *activeTouches;
@@ -39,7 +40,7 @@ typedef enum
     IBOutlet UIView *settingsView;
 }
 
-@property (retain) ControlMain *mainController;
+@property (retain) PDMModelController *mainController;
 @property (retain) IBOutlet ViewFace *faceView;
 @property (retain) IBOutlet UISegmentedControl *segControl;
 @property (retain) IBOutlet UISlider *slider;

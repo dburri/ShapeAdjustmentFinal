@@ -12,6 +12,7 @@
 
 @synthesize scale;
 @synthesize touchRadius;
+@synthesize drawShape;
 
 - (id)initWithFrame:(CGRect)frame
 {
@@ -19,6 +20,7 @@
     if (self) {
         activeTouches = [[NSMutableArray alloc] init];
         scale = 1;
+        drawShape = YES;
     }
     return self;
 }
@@ -29,6 +31,7 @@
     if (self) {
         activeTouches = [[NSMutableArray alloc] init];
         scale = 1;
+        drawShape = YES;
     }
     return self;
 }
@@ -36,26 +39,32 @@
 
 - (void)dealloc
 {
-    
+    NSLog(@"ViewFace Dealloc");
 }
 
 
 - (void)setImage:(UIImage*)img
 {
     
-    CGSize viewSize = self.frame.size;
-    
-    float s1 = img.size.width/viewSize.width;
-    float s2 = img.size.height/viewSize.height;
-    scale = 1/MAX(s1,s2);
-    
-    CGSize imgSize = CGSizeMake(scale*img.size.width, scale*img.size.height);
-    
-    UIGraphicsBeginImageContext(imgSize);
-    [img drawInRect:CGRectMake(0, 0, imgSize.width, imgSize.height)];
-    tmpImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    
+    if(img.size.width == self.frame.size.width && img.size.width == self.frame.size.width)
+    {
+        tmpImage = img;
+    }
+    else 
+    {
+        CGSize viewSize = self.frame.size;
+        
+        float s1 = img.size.width/viewSize.width;
+        float s2 = img.size.height/viewSize.height;
+        scale = 1/MAX(s1,s2);
+        
+        CGSize imgSize = CGSizeMake(scale*img.size.width, scale*img.size.height);
+        
+        UIGraphicsBeginImageContext(imgSize);
+        [img drawInRect:CGRectMake(0, 0, imgSize.width, imgSize.height)];
+        tmpImage = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+    }
     [self setNeedsDisplay];
 }
 
@@ -77,7 +86,7 @@
     [tmpImage drawInRect:imgRect];
 
     
-    if(tmpShape)
+    if(tmpShape && drawShape)
     {
         const point_info_t *pointInfo = [tmpShape.pointsInfo getPointInfo];
         for(int i = 0; i < tmpShape.num_points; ++i)
@@ -104,10 +113,17 @@
             
             // draw point
             CGContextSetLineWidth(context, 3.0f);
+            CGContextSetStrokeColorWithColor(context, [UIColor blackColor].CGColor);
+            CGContextSetFillColorWithColor(context, [UIColor blackColor].CGColor);
+            CGRect rect1 = CGRectMake(p1.x-2.5, p1.y-2.5, 5, 5);
+            CGContextFillEllipseInRect(context, rect1);
+            
+            // draw point
+            CGContextSetLineWidth(context, 3.0f);
             CGContextSetStrokeColorWithColor(context, [UIColor greenColor].CGColor);
             CGContextSetFillColorWithColor(context, [UIColor greenColor].CGColor);
-            CGRect rect = CGRectMake(p1.x-2, p1.y-2, 4, 4);
-            CGContextFillEllipseInRect(context, rect);
+            CGRect rect2 = CGRectMake(p1.x-2, p1.y-2, 4, 4);
+            CGContextFillEllipseInRect(context, rect2);
         }
     }
     

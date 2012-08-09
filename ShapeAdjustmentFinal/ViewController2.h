@@ -7,14 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "ControlMain.h"
+#import "PDMModelController.h"
 #import "ViewFace.h"
 #import "ViewController.h"
 #import "ViewController3.h"
 
 @interface ViewController2 : UIViewController
 {
-    ControlMain *mainController;
+    PDMModelController *mainController;
     
     PDMShapeParameter *tmpParam;
     NSMutableArray *b;
@@ -25,7 +25,7 @@
     IBOutlet UISegmentedControl *segControl;
 }
 
-@property (retain) ControlMain *mainController;
+@property (retain) PDMModelController *mainController;
 @property (retain) IBOutlet ViewFace *faceView;
 @property (retain) IBOutlet UISlider *slider;
 @property (retain) IBOutlet UISegmentedControl *segControl;

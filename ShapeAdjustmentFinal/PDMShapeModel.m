@@ -29,7 +29,7 @@
     NSLog(@"PDMShapeModel:dealloc");
     meanShape = nil;
     free(eigVecs);
-    free(eigVecs);
+    free(eigVals);
 }
 
 

@@ -17,6 +17,7 @@
     PDMShape *tmpShape;
     
     float scale;
+    BOOL drawShape;
     
     NSMutableArray *activeTouches;
     float touchRadius;
@@ -24,6 +25,7 @@
 
 @property (nonatomic, readonly) float scale;
 @property (nonatomic) float touchRadius;
+@property (nonatomic) BOOL drawShape;
 
 
 - (void)setImage:(UIImage*)img;

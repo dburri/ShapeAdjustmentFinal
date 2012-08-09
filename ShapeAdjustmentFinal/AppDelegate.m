@@ -17,16 +17,16 @@
 {
     // Override point for customization after application launch.
     
-    // initialize main controller
-    ControlMain *mainController = [[ControlMain alloc] init];
-    [mainController loadShapeModel:@"xm2vts_m_model_xm" :@"xm2vts_m_model_v" :@"xm2vts_m_model_d" :@"xm2vts_m_model_tri"];
-
-    // retrieve root view controller and pass main controller to it
-    ViewController *rootViewController = (ViewController*)_window.rootViewController;
-    rootViewController.mainController = mainController;
-
-    
-    NSLog(@"Application launched....");
+//    // initialize main controller
+//    PDMModelController *mainController = [[PDMModelController alloc] init];
+//    [mainController loadShapeModel:@"xm2vts_m_model_xm" :@"xm2vts_m_model_v" :@"xm2vts_m_model_d" :@"xm2vts_m_model_tri"];
+//
+//    // retrieve root view controller and pass main controller to it
+//    ViewController *rootViewController = (ViewController*)_window.rootViewController;
+//    rootViewController.mainController = mainController;
+//
+//    
+//    NSLog(@"Application launched....");
     
     return YES;
 }

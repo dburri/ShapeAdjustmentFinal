@@ -23,7 +23,6 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    NSLog(@"viewDidLoad2...mainController = %@", mainController);
     
     if(mainController)
     {
@@ -33,7 +32,6 @@
         // set param vector
         b = mainController.shapeParams.b;
         int index = segControl.selectedSegmentIndex;
-        NSLog(@"INDEX = %i, SIZE OF B = %i", index, [b count]);
         [slider setValue:[[b objectAtIndex:index] floatValue]];
     }
 }
@@ -55,13 +53,11 @@
     if([[segue identifier] isEqualToString:@"View2ToView1"]) {
         ViewController *VC = (ViewController*)[segue destinationViewController];
         VC.mainController = mainController;
-        NSLog(@"Transition to the first view");
     }
     
     if([[segue identifier] isEqualToString:@"View2ToView3"]) {
         ViewController3 *VC = (ViewController3*)[segue destinationViewController];
         VC.mainController = mainController;
-        NSLog(@"Transition to the third view");
     }
 }
 

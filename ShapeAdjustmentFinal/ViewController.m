@@ -16,6 +16,7 @@
 
 @synthesize mainController;
 @synthesize faceView;
+@synthesize buttonContinue;
 
 - (void)viewDidLoad
 {
@@ -28,7 +29,28 @@
         [faceView setImage:mainController.faceImage];
         [faceView setShape:mainController.faceShape];
     }
+    else
+    {
+        buttonContinue.enabled = false;
+        buttonContinue.hidden = true;
+    }
     
+}
+
+- (void)startModeling:(UIImage*)img
+{
+    mainController = [[PDMModelController alloc] init];
+    [mainController loadShapeModel:@"xm2vts_m_model_xm" :@"xm2vts_m_model_v" :@"xm2vts_m_model_d" :@"xm2vts_m_model_tri"];
+    
+    [mainController newFaceWithImage:img];
+    
+    [faceView setImage:mainController.faceImage];
+    [faceView setShape:mainController.faceShape];
+    
+    [faceView setNeedsDisplay];
+    
+    buttonContinue.enabled = true;
+    buttonContinue.hidden = false;
 }
 
 - (void)viewDidUnload
@@ -46,28 +68,19 @@
     if([[segue identifier] isEqualToString:@"View1ToView2"]) {
         ViewController2 *VC = (ViewController2*)[segue destinationViewController];
         VC.mainController = self.mainController;
-        NSLog(@"Transition to the second view");
     }
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
-    NSLog(@"Image picked...");
 	[picker dismissModalViewControllerAnimated:YES];
-    
     UIImage *image = [info objectForKey:@"UIImagePickerControllerOriginalImage"];
-    [mainController newFaceWithImage:image];
-    
-    [faceView setImage:mainController.faceImage];
-    [faceView setShape:mainController.faceShape];
-    
-    [faceView setNeedsDisplay];
+    [self startModeling:image];
 }
 
 
-- (IBAction)loadImageLibrary:(id)sender {
-    NSLog(@"Load Image From Library");
-    
+- (IBAction)loadImageLibrary:(id)sender
+{
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
 	picker.delegate = self;
     picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
@@ -75,9 +88,8 @@
     
 }
 
-- (IBAction)loadImageCamera:(id)sender {
-    NSLog(@"Load Image From Camera");
-    
+- (IBAction)loadImageCamera:(id)sender
+{
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
 	picker.delegate = self;
     picker.sourceType = UIImagePickerControllerSourceTypeCamera;
@@ -87,6 +99,9 @@
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {   
+    if(!mainController)
+        return;
+    
     NSArray *touchesArray = [touches allObjects];
     for(NSInteger j = 0; j < [touchesArray count]; ++j) {
         if (![activeTouches containsObject:[touchesArray objectAtIndex:j]]) {
@@ -95,18 +110,12 @@
     }
     
     int touchesCount = [activeTouches count];
-    NSLog(@"Touch Count = %i", touchesCount);
+    //NSLog(@"Touch Count = %i", touchesCount);
     
-    if(touchesCount == 1) {
-        firstTouchStart = [NSDate date];
-    }
-    NSDate *touchTime = [NSDate date];
-    double dt = [touchTime timeIntervalSinceDate:firstTouchStart];
-
     
     if(touchesCount == 1 && touchMode == TOUCH_NONE)
     {
-        NSLog(@"set mode to translate");
+        //NSLog(@"set mode to translate");
         touchMode = TOUCH_TRANSLATE_SHAPE;
         UITouch * touch = [touches anyObject];
         touchStartPos = [touch locationInView:self.view];
@@ -114,7 +123,7 @@
     
     if(touchesCount == 2)
     {
-        NSLog(@"set mode to scale");
+        //NSLog(@"set mode to scale");
         touchMode = TOUCH_SCALE_SHAPE;
         UITouch *touch1 = [activeTouches objectAtIndex:0];
         UITouch *touch2 = [activeTouches objectAtIndex:1];
@@ -135,7 +144,6 @@
 {
     if(touchMode == TOUCH_TRANSLATE_SHAPE)
     {
-        NSLog(@"Translate shape!!!");
         UITouch *touch = [activeTouches objectAtIndex:0];
         CGPoint p = [touch locationInView:self.view];
         
@@ -148,8 +156,6 @@
     
     else if(touchMode == TOUCH_SCALE_SHAPE)
     {
-        NSLog(@"Scale shape!!!");
-    
         UITouch *touch1 = [activeTouches objectAtIndex:0];
         UITouch *touch2 = [activeTouches objectAtIndex:1];
         

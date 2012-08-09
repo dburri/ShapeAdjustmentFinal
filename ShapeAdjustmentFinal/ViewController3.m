@@ -116,7 +116,11 @@
     if([[segue identifier] isEqualToString:@"View3ToView2"]) {
         ViewController2 *VC = (ViewController2*)[segue destinationViewController];
         VC.mainController = mainController;
-        NSLog(@"Transition to the second view");
+    }
+    if([[segue identifier] isEqualToString:@"View3ToViewWarp"]) {
+        ViewControllerWarp *VC = (ViewControllerWarp*)[segue destinationViewController];
+        VC.srcShape = mainController.faceShape;
+        VC.origImage = mainController.faceImage;
     }
 }
 

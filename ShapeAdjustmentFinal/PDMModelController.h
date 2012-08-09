@@ -10,7 +10,7 @@
 
 #import "PDMShapeModel.h"
 
-@interface ControlMain : NSObject {
+@interface PDMModelController : NSObject {
     PDMShapeModel *shapeModel;
     PDMShapeParameter *shapeParams;
     

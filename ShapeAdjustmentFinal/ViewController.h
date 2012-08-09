@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "ControlMain.h"
+#import "PDMModelController.h"
 #import "ViewFace.h"
 #import "ViewController2.h"
 
@@ -31,10 +31,10 @@ typedef enum
 @end
 
 
-@interface ViewController : UIViewController < UIImagePickerControllerDelegate, UINavigationControllerDelegate >
+@interface ViewController : UIViewController < UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIGestureRecognizerDelegate >
 {
-    ControlMain *mainController;
-    IBOutlet ViewFace *faceView;
+    PDMModelController *mainController;
+    __weak IBOutlet ViewFace *faceView;
 
     PDMTMat *origTMat;
     PDMTMat *tmpTMat;
@@ -46,10 +46,13 @@ typedef enum
     
     NSMutableArray *activeTouches;
     NSDate *firstTouchStart;
+    
+    IBOutlet UIButton *buttonContinue;
 }
 
-@property (strong) ControlMain *mainController;
-@property (retain) IBOutlet ViewFace *faceView;
+@property (nonatomic, retain) PDMModelController *mainController;
+@property (nonatomic, weak) IBOutlet ViewFace *faceView;
+@property (nonatomic, retain) IBOutlet UIButton *buttonContinue;
 
 - (IBAction)loadImageLibrary:(id)sender;
 - (IBAction)loadImageCamera:(id)sender;
